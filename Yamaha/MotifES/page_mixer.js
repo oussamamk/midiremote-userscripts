@@ -30,12 +30,12 @@ function makePageMixer(deviceDriver, page, midiOutput, surfaceElements) {
     for (var i = 0; i < surfaceElements.numStrips; i++) {
         var hostMixerBankChannel = hostMixerBankZone.makeMixerBankChannel()
 
-        var knobSurfaceValue = surfaceElements.knobs[i].mSurfaceValue;
-        var faderSurfaceValue = surfaceElements.faders[i].mSurfaceValue;
-        var sel_buttonSurfaceValue = surfaceElements.btnsRow1[i].devButton.mSurfaceValue;
-        var mute_buttonSurfaceValue = surfaceElements.btnsRow2[i].devButton.mSurfaceValue;
-        var solo_buttonSurfaceValue = surfaceElements.btnsRow3[i].devButton.mSurfaceValue;
-        var rec_buttonSurfaceValue = surfaceElements.btnsRow4[i].devButton.mSurfaceValue;
+        var knobSurfaceValue = surfaceElements.knobs[i].mSurfaceValue
+        var faderSurfaceValue = surfaceElements.faders[i].mSurfaceValue
+        var sel_buttonSurfaceValue = surfaceElements.btnsRow1[i].devButton.mSurfaceValue
+        var mute_buttonSurfaceValue = surfaceElements.btnsRow2[i].devButton.mSurfaceValue
+        var solo_buttonSurfaceValue = surfaceElements.btnsRow3[i].devButton.mSurfaceValue
+        var rec_buttonSurfaceValue = surfaceElements.btnsRow4[i].devButton.mSurfaceValue
 
         page.makeValueBinding(knobSurfaceValue, hostMixerBankChannel.mValue.mPan).setValueTakeOverModeScaled().setSubPage(subPageFaderVolume)
         page.makeValueBinding(faderSurfaceValue, hostMixerBankChannel.mValue.mVolume).setValueTakeOverModeJump().setSubPage(subPageFaderVolume)

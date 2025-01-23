@@ -1,7 +1,7 @@
 var helper = require('./helper.js')
 var makeLabel = helper.makeLabel
 var setTextOfColumn = helper.setTextOfColumn
-
+var makeLabel2 = helper.makeLabel2
 /**
  * 
  * @param {MR_ActiveDevice} activeDevice 
@@ -142,10 +142,9 @@ function makeKnob(deviceDriver, midiInput, midiOutput, i, cc, x, y, h, w) {
   knob.mSurfaceValue.mMidiBinding
     .setInputPort(midiInput)
     .bindToControlChange(0, cc)
-    .setTypeRelativeSignedBit()
+    .setTypeAbsolute()
 
   knob.mSurfaceValue.mOnTitleChange = function (activeDevice, objectTitle, valueTitle) {
-    //console.log("Knob Title Changed:" + objectTitle + ":" + valueTitle)
     var activePage = activeDevice.getState("activePage")
 
     var knobTitles = activeDevice.getState(activePage + ' - Knob - Titles')
@@ -160,7 +159,7 @@ function makeKnob(deviceDriver, midiInput, midiOutput, i, cc, x, y, h, w) {
     var activePage = activeDevice.getState("activePage")
     var knobValues = activeDevice.getState(activePage + ' - Knob - Values')
 
-    activeDevice.setState(activePage + ' - Knob - Values', setTextOfColumn(this.i, makeLabel(value, 6), knobValues))
+    activeDevice.setState(activePage + ' - Knob - Values', setTextOfColumn(this.i, makeLabel2(value, 6), knobValues))
     updateDisplay(activeDevice.getState('Display - idRow1'), activeDevice.getState('Display - idRow2'), activeDevice.getState('Display - idAltRow1'), activePage + ' - Knob - Values', activeDevice, midiOutput)
   }.bind({ midiOutput, i })
 
@@ -214,9 +213,9 @@ function bindCommandKnob(knob, commandIncrease, commandDecrease) {
   knob.mOnProcessValueChange = function (activeDevice, value) {
     // console.log('value changed: ' + value)
     if (value < 0.5) {
-      commandIncrease.setProcessValue(activeDevice, 1);
+      commandIncrease.setProcessValue(activeDevice, 1)
     } else if (value > 0.5) {
-      commandDecrease.setProcessValue(activeDevice, 1);
+      commandDecrease.setProcessValue(activeDevice, 1)
     }
   }
 }

@@ -10,14 +10,13 @@ var makePageWithDefaults = master_controls.makePageWithDefaults
  */
 function clearChannelState(activeDevice) {
   var activePage = activeDevice.getState("activePage")
-  var activeSubPage = activeDevice.getState("activeSubPage")
 
-  activeDevice.setState(activePage + "- " + activeSubPage + ' - Fader - Titles', "")
-  activeDevice.setState(activePage + "- " + activeSubPage + ' - Fader - ValueTitles', "")
-  activeDevice.setState(activePage + "- " + activeSubPage + ' - Fader - Values', "")
-  activeDevice.setState(activePage + "- " + activeSubPage + ' - Knob - Titles', "")
-  activeDevice.setState(activePage + "- " + activeSubPage + ' - Knob - ValueTitles', "")
-  activeDevice.setState(activePage + "- " + activeSubPage + ' - Knob - Values', "")
+  activeDevice.setState(activePage + ' - Fader - Titles', "")
+  activeDevice.setState(activePage + ' - Fader - ValueTitles', "")
+  activeDevice.setState(activePage + ' - Fader - Values', "")
+  activeDevice.setState(activePage + ' - Knob - Titles', "")
+  activeDevice.setState(activePage + ' - Knob - ValueTitles', "")
+  activeDevice.setState(activePage + ' - Knob - Values', "")
 
   activeDevice.setState("displayType", "Knob")
 }

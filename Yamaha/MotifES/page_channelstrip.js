@@ -28,7 +28,7 @@ function makePageChannelStrip(deviceDriver, page, midiOutput, surfaceElements) {
     var stripEffects = selectedTrackChannel.mInsertAndStripEffects.mStripEffects
 
     for (var i = 0; i < surfaceElements.numStrips; i++) {
-        var knobsSurfaceValue = surfaceElements.knobs[i].mSurfaceValue;
+        var knobsSurfaceValue = surfaceElements.knobs[i].mSurfaceValue
 
         var gate = stripEffects.mGate.mParameterBankZone.makeParameterValue()
         var compressor = stripEffects.mCompressor.mParameterBankZone.makeParameterValue()

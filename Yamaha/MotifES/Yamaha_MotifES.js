@@ -28,10 +28,10 @@ var deviceDriver = midiremote_api.makeDeviceDriver('Yamaha', 'MotifES', 'Oussi')
 var midiInput = deviceDriver.mPorts.makeMidiInput()
 var midiOutput = deviceDriver.mPorts.makeMidiOutput()
 
-var isSurfaceElementsInitialized = false;
+var isSurfaceElementsInitialized = false
 
 deviceDriver.mOnActivate = function (activeDevice) {
-    console.log('Yaamaha Motif ES Activated');
+    console.log('Yaamaha Motif ES Activated')
     if (isSurfaceElementsInitialized) {
         clearAllLeds(activeDevice, midiOutput, surfaceElements)
     }
@@ -39,17 +39,17 @@ deviceDriver.mOnActivate = function (activeDevice) {
 }
 
 deviceDriver.makeDetectionUnit().detectPortPair(midiInput, midiOutput)
-    .expectInputNameEquals('Yamaha MOTIF ES-4')
+    .expectInputNameEquals('BMT 1')
     .expectOutputNameEquals('Yamaha MOTIF ES-4')
 
 var surfaceElements = makeSurfaceElements(deviceDriver, midiInput, midiOutput)
-isSurfaceElementsInitialized = true;
-var mixerPage = deviceDriver.mMapping.makePage('Mixer');
-var eqSelectedTrackPage = deviceDriver.mMapping.makePage('SelectedTrack-EQ');
-var cueSendsSelectedTrackPage = deviceDriver.mMapping.makePage('SelectedTrack-CueSends');
-var channelStripPage = deviceDriver.mMapping.makePage('ChannelStrip');
-var controlRoomPage = deviceDriver.mMapping.makePage('ControlRoom');
-var midiPage = deviceDriver.mMapping.makePage('Midi');
+isSurfaceElementsInitialized = true
+var mixerPage = deviceDriver.mMapping.makePage('Mixer')
+var eqSelectedTrackPage = deviceDriver.mMapping.makePage('SelectedTrack-EQ')
+var cueSendsSelectedTrackPage = deviceDriver.mMapping.makePage('SelectedTrack-CueSends')
+var channelStripPage = deviceDriver.mMapping.makePage('ChannelStrip')
+var controlRoomPage = deviceDriver.mMapping.makePage('ControlRoom')
+var midiPage = deviceDriver.mMapping.makePage('Midi')
 makePageMixer(deviceDriver, mixerPage, midiOutput, surfaceElements)
 makePageEQ(deviceDriver, eqSelectedTrackPage, midiOutput, surfaceElements)
 makePageCueSends(deviceDriver, cueSendsSelectedTrackPage, midiOutput, surfaceElements)
