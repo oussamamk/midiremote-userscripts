@@ -15,7 +15,7 @@ var clearChannelState = surface_elements.clearChannelState
  * @param {object} surfaceElements 
  */
 function makeSubPagePrefilter(page, subPageArea, subPageEQ, preFilter, midiOutput, surfaceElements) {
-    var subPagePreFilter = subPageArea.makeSubPage("PreFilter")
+    var subPagePreFilter = subPageArea.makeSubPage('PreFilter')
 
     page.makeValueBinding(surfaceElements.btnsRow1[0].devButton.mSurfaceValue, preFilter.mBypass).setTypeToggle().setSubPage(subPageEQ)
     page.makeActionBinding(surfaceElements.btnsRow2[0].devButton.mSurfaceValue, subPagePreFilter.mAction.mActivate).setSubPage(subPageEQ)
@@ -80,13 +80,13 @@ function makePageEQ(deviceDriver, page, midiOutput, surfaceElements) {
 
     var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
     makeSubPagePrefilter(page, subPageArea, subPageEQ, selectedTrackChannel.mPreFilter, midiOutput, surfaceElements)
-    makeSubPageEQBand(page, subPageArea, subPageEQ, selectedTrackChannel.mChannelEQ.mBand1, 1, "BandEQ1", midiOutput, surfaceElements)
-    makeSubPageEQBand(page, subPageArea, subPageEQ, selectedTrackChannel.mChannelEQ.mBand2, 2, "BandEQ2", midiOutput, surfaceElements)
-    makeSubPageEQBand(page, subPageArea, subPageEQ, selectedTrackChannel.mChannelEQ.mBand3, 3, "BandEQ3", midiOutput, surfaceElements)
-    makeSubPageEQBand(page, subPageArea, subPageEQ, selectedTrackChannel.mChannelEQ.mBand4, 4, "BandEQ4", midiOutput, surfaceElements)
+    makeSubPageEQBand(page, subPageArea, subPageEQ, selectedTrackChannel.mChannelEQ.mBand1, 1, 'BandEQ1', midiOutput, surfaceElements)
+    makeSubPageEQBand(page, subPageArea, subPageEQ, selectedTrackChannel.mChannelEQ.mBand2, 2, 'BandEQ2', midiOutput, surfaceElements)
+    makeSubPageEQBand(page, subPageArea, subPageEQ, selectedTrackChannel.mChannelEQ.mBand3, 3, 'BandEQ3', midiOutput, surfaceElements)
+    makeSubPageEQBand(page, subPageArea, subPageEQ, selectedTrackChannel.mChannelEQ.mBand4, 4, 'BandEQ4', midiOutput, surfaceElements)
 
     page.mOnActivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
-        activeDevice.setState("activePage", "SelectedTrack-EQ")
+        activeDevice.setState('activePage', 'SelectedTrack-EQ')
         clearAllLeds(activeDevice, this.midiOutput, this.surfaceElements)
         clearChannelState(activeDevice)
         this.midiOutput.sendMidi(activeDevice, [0x90, this.surfaceElements.btnsRow2[0].note, 127])

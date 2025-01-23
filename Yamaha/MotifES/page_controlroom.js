@@ -9,16 +9,16 @@ var makePageWithDefaults = master_controls.makePageWithDefaults
  * @param {MR_ActiveDevice} activeDevice 
  */
 function clearChannelState(activeDevice) {
-  var activePage = activeDevice.getState("activePage")
+  var activePage = activeDevice.getState('activePage')
 
-  activeDevice.setState(activePage + ' - Fader - Titles', "")
-  activeDevice.setState(activePage + ' - Fader - ValueTitles', "")
-  activeDevice.setState(activePage + ' - Fader - Values', "")
-  activeDevice.setState(activePage + ' - Knob - Titles', "")
-  activeDevice.setState(activePage + ' - Knob - ValueTitles', "")
-  activeDevice.setState(activePage + ' - Knob - Values', "")
+  activeDevice.setState(activePage + ' - Fader - Titles', '')
+  activeDevice.setState(activePage + ' - Fader - ValueTitles', '')
+  activeDevice.setState(activePage + ' - Fader - Values', '')
+  activeDevice.setState(activePage + ' - Knob - Titles', '')
+  activeDevice.setState(activePage + ' - Knob - ValueTitles', '')
+  activeDevice.setState(activePage + ' - Knob - Values', '')
 
-  activeDevice.setState("displayType", "Knob")
+  activeDevice.setState('displayType', 'Knob')
 }
 
 /**
@@ -51,7 +51,7 @@ function makePageRoomControl(deviceDriver, page, midiOutput, surfaceElements) {
   }
 
   page.mOnActivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
-    activeDevice.setState("activePage", "ControlRoom")
+    activeDevice.setState('activePage', 'ControlRoom')
     clearAllLeds(activeDevice, this.midiOutput, this.surfaceElements)
     clearChannelState(activeDevice)
   }.bind({ midiOutput, surfaceElements })

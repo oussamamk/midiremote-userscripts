@@ -86,7 +86,7 @@ function makePageChannelStrip(deviceDriver, page, midiOutput, surfaceElements) {
     }.bind({ midiOutput, surfaceElements })
 
     page.mOnActivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
-        activeDevice.setState("activePage", "ChannelStrip")
+        activeDevice.setState('activePage', 'ChannelStrip')
         clearAllLeds(activeDevice, this.midiOutput, this.surfaceElements)
         clearChannelState(activeDevice)
     }.bind({ midiOutput, surfaceElements })

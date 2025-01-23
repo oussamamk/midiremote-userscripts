@@ -20,13 +20,13 @@ function makePageCueSends(deviceDriver, page, midiOutput, surfaceElements) {
 
     var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
     page.makeValueBinding(surfaceElements.btnsRow1[7].devButton.mSurfaceValue, selectedTrackChannel.mCueSends.mBypass).setTypeToggle().setSubPage(subPageEQ)
-    makeSubPageCueSend(page, subPageArea, subPageEQ, selectedTrackChannel.mCueSends.getByIndex(0), 0, "CueSend1", midiOutput, surfaceElements)
-    makeSubPageCueSend(page, subPageArea, subPageEQ, selectedTrackChannel.mCueSends.getByIndex(1), 1, "CueSend2", midiOutput, surfaceElements)
-    makeSubPageCueSend(page, subPageArea, subPageEQ, selectedTrackChannel.mCueSends.getByIndex(2), 2, "CueSend3", midiOutput, surfaceElements)
-    makeSubPageCueSend(page, subPageArea, subPageEQ, selectedTrackChannel.mCueSends.getByIndex(3), 3, "CueSend4", midiOutput, surfaceElements)
+    makeSubPageCueSend(page, subPageArea, subPageEQ, selectedTrackChannel.mCueSends.getByIndex(0), 0, 'CueSend1', midiOutput, surfaceElements)
+    makeSubPageCueSend(page, subPageArea, subPageEQ, selectedTrackChannel.mCueSends.getByIndex(1), 1, 'CueSend2', midiOutput, surfaceElements)
+    makeSubPageCueSend(page, subPageArea, subPageEQ, selectedTrackChannel.mCueSends.getByIndex(2), 2, 'CueSend3', midiOutput, surfaceElements)
+    makeSubPageCueSend(page, subPageArea, subPageEQ, selectedTrackChannel.mCueSends.getByIndex(3), 3, 'CueSend4', midiOutput, surfaceElements)
 
     page.mOnActivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
-        activeDevice.setState("activePage", "SelectedTrack-CueSends")
+        activeDevice.setState('activePage', 'SelectedTrack-CueSends')
         clearAllLeds(activeDevice, midiOutput, surfaceElements)
         clearChannelState(activeDevice)
         midiOutput.sendMidi(activeDevice, [0x90, surfaceElements.btnsRow2[0].note, 127])

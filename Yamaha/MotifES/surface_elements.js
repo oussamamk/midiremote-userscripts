@@ -7,15 +7,15 @@ var makeLabel2 = helper.makeLabel2
  * @param {MR_ActiveDevice} activeDevice 
  */
 function clearChannelState(activeDevice) {
-  var activePage = activeDevice.getState("activePage")
-  activeDevice.setState(activePage + ' - Fader - Titles', "")
-  activeDevice.setState(activePage + ' - Fader - ValueTitles', "")
-  activeDevice.setState(activePage + ' - Fader - Values', "")
-  activeDevice.setState(activePage + ' - Knob - Titles', "")
-  activeDevice.setState(activePage + ' - Knob - ValueTitles', "")
-  activeDevice.setState(activePage + ' - Knob - Values', "")
+  var activePage = activeDevice.getState('activePage')
+  activeDevice.setState(activePage + ' - Fader - Titles', '')
+  activeDevice.setState(activePage + ' - Fader - ValueTitles', '')
+  activeDevice.setState(activePage + ' - Fader - Values', '')
+  activeDevice.setState(activePage + ' - Knob - Titles', '')
+  activeDevice.setState(activePage + ' - Knob - ValueTitles', '')
+  activeDevice.setState(activePage + ' - Knob - Values', '')
 
-  activeDevice.setState("displayType", "Knob")
+  activeDevice.setState('displayType', 'Knob')
 }
 
 /**
@@ -51,14 +51,14 @@ function updateDisplay(idRow1, idRow2, idAltRow1, idAltRow2, activeDevice, midiO
   var altRow1 = activeDevice.getState(idAltRow1)
   var altRow2 = activeDevice.getState(idAltRow2)
 
-  var displayType = activeDevice.getState("displayType")
+  var displayType = activeDevice.getState('displayType')
 
   switch (displayType) {
-    case "Knob":
+    case 'Knob':
       _sendDisplayData(1, altRow1, activeDevice, midiOutput)
       _sendDisplayData(0, altRow2, activeDevice, midiOutput)
       break
-    case "Knob-Fader":
+    case 'Knob-Fader':
       _sendDisplayData(1, row1, activeDevice, midiOutput)
       _sendDisplayData(0, altRow2, activeDevice, midiOutput)
       break
@@ -145,7 +145,7 @@ function makeKnob(deviceDriver, midiInput, midiOutput, i, cc, x, y, h, w) {
     .setTypeAbsolute()
 
   knob.mSurfaceValue.mOnTitleChange = function (activeDevice, objectTitle, valueTitle) {
-    var activePage = activeDevice.getState("activePage")
+    var activePage = activeDevice.getState('activePage')
 
     var knobTitles = activeDevice.getState(activePage + ' - Knob - Titles')
     var knobValueTitles = activeDevice.getState(activePage + ' - Knob - ValueTitles')
@@ -156,7 +156,7 @@ function makeKnob(deviceDriver, midiInput, midiOutput, i, cc, x, y, h, w) {
   }.bind({ midiOutput, i })
 
   knob.mSurfaceValue.mOnDisplayValueChange = function (activeDevice, value, units) {
-    var activePage = activeDevice.getState("activePage")
+    var activePage = activeDevice.getState('activePage')
     var knobValues = activeDevice.getState(activePage + ' - Knob - Values')
 
     activeDevice.setState(activePage + ' - Knob - Values', setTextOfColumn(this.i, makeLabel2(value, 6), knobValues))
@@ -184,7 +184,7 @@ function makeFader(deviceDriver, midiInput, midiOutput, i, x, y, w, h) {
     .bindToPitchBend(i)
 
   fader.mSurfaceValue.mOnTitleChange = function (activeDevice, objectTitle, valueTitle) {
-    var activePage = activeDevice.getState("activePage")
+    var activePage = activeDevice.getState('activePage')
     var faderTitles = activeDevice.getState(activePage + ' - Fader - Titles')
     var faderValueTitles = activeDevice.getState(activePage + ' - Fader - ValueTitles')
     activeDevice.setState(activePage + ' - Fader - Titles', setTextOfColumn(this.i, makeLabel(objectTitle, 6), faderTitles))
@@ -193,7 +193,7 @@ function makeFader(deviceDriver, midiInput, midiOutput, i, x, y, w, h) {
   }.bind({ i, midiOutput })
 
   fader.mSurfaceValue.mOnDisplayValueChange = function (activeDevice, value, units) {
-    var activePage = activeDevice.getState("activePage")
+    var activePage = activeDevice.getState('activePage')
     var faderValues = activeDevice.getState(activePage + ' - Fader - Values')
 
     activeDevice.setState(activePage + ' - Fader - Values', setTextOfColumn(this.i, makeLabel(value, 6), faderValues))

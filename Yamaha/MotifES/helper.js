@@ -14,7 +14,7 @@ function setTextOfColumn(columnIndex, col_text, original_text) {
     var new_text = original_text.slice(0, 56)
     var length = new_text.length
     while (length++ < 56)
-        new_text = new_text.concat(" ")
+        new_text = new_text.concat(' ')
 
     new_text = new_text.substring(0, col) + text + new_text.substring(col + 7, new_text.length)
 
@@ -27,7 +27,7 @@ function setTextOfColumn(columnIndex, col_text, original_text) {
  * @returns 
  */
 function setTextOfLine(textString) {
-    var blank = Array(56).join(" ")
+    var blank = Array(56).join(' ')
     var text = (textString + blank).slice(0, 56)
 
     return text
@@ -45,8 +45,8 @@ function makeLabel(value, length) {
     }
 
     // If to long shorten it by removing vowels and making it CamelCase to remove spaces
-    var words = value.split(" ")
-    var label = ""
+    var words = value.split(' ')
+    var label = ''
 
     for (var i = 0, len = words.length; i < len; i++) {
         var currentStr = words[i]
@@ -71,8 +71,8 @@ function makeLabel2(value, length) {
     }
 
     // If to long shorten it by removing vowels and making it CamelCase to remove spaces
-    var words = value.split(" ")
-    var label = ""
+    var words = value.split(' ')
+    var label = ''
 
     for (var i = 0, len = words.length; i < len; i++) {
         var currentStr = words[i]

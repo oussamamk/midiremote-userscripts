@@ -22,7 +22,7 @@ function makePageMixer(deviceDriver, page, midiOutput, surfaceElements) {
     var buttonSubPageArea = page.makeSubPageArea('Buttons')
     var subPageButtonDefaultSet = buttonSubPageArea.makeSubPage('DefaultSet')
 
-    var hostMixerBankZone = page.mHostAccess.mMixConsole.makeMixerBankZone("AudioInstrBanks")
+    var hostMixerBankZone = page.mHostAccess.mMixConsole.makeMixerBankZone('AudioInstrBanks')
         .includeAudioChannels()
         .includeInstrumentChannels()
         .setFollowVisibility(true)
@@ -46,10 +46,10 @@ function makePageMixer(deviceDriver, page, midiOutput, surfaceElements) {
     }
 
     page.mOnActivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
-        activeDevice.setState("activePage", "Mixer")
+        activeDevice.setState('activePage', 'Mixer')
         clearAllLeds(activeDevice, this.midiOutput, this.surfaceElements)
         clearChannelState(activeDevice)
-        activeDevice.setState("displayType", "Knob-Fader")
+        activeDevice.setState('displayType', 'Knob-Fader')
     }.bind({ midiOutput, surfaceElements })
 
     return page

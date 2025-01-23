@@ -20,8 +20,8 @@ function makePageMidi(deviceDriver, page, midiOutput, surfaceElements) {
     }
 
     page.mOnActivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
-        var activePage = "Midi"
-        activeDevice.setState("activePage", activePage)
+        var activePage = 'Midi'
+        activeDevice.setState('activePage', activePage)
         clearAllLeds(activeDevice, this.midiOutput, this.surfaceElements)
         clearChannelState(activeDevice)
     }.bind({ midiOutput, surfaceElements })
