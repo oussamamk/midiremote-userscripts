@@ -85,6 +85,7 @@ function makeButton(surface, midiInput, midiOutput, note, x, y, w, h, isLed) {
     button.y = y
     button.w = w
     button.h = h
+    button.state = false
 
     if (isLed) {
         button.d.mSurfaceValue.mOnProcessValueChange = function (/** @type {MR_ActiveDevice} */activeDevice) {
@@ -281,15 +282,12 @@ function createSurfaceElements(deviceDriver, context) {
  * 
  * @param {MR_DeviceDriver} deviceDriver 
  * @param {MR_FactoryMappingPage} page 
+ * @param {MR_SubPage} defaultSubPage 
  * @param {object} context 
  * @returns
  */
-function makePageMixer(deviceDriver, page, context) {
-    var subPageArea = page.makeSubPageArea('mixer')
-    var defaultSubPage = subPageArea.makeSubPage('default')
-    var zoomSubPage = subPageArea.makeSubPage('zoom')
-    var markerSubPage = subPageArea.makeSubPage('marker')
 
+function createTransportAndContols(deviceDriver, page, defaultSubPage, context) {
     //page.makeActionBinding(context.btnPageUp.mSurfaceValue, deviceDriver.mAction.mPrevPage).setSubPage(defaultSubPage)
     //page.makeActionBinding(context.btnPageDown.mSurfaceValue, deviceDriver.mAction.mNextPage).setSubPage
 
@@ -302,23 +300,10 @@ function makePageMixer(deviceDriver, page, context) {
     page.makeCommandBinding(context.btnLeft.d.mSurfaceValue, 'Transport', '').setSubPage(defaultSubPage)
     page.makeActionBinding(context.btnDown.d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mNextTrack).setSubPage(defaultSubPage)
     page.makeActionBinding(context.btnUp.d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mPrevTrack).setSubPage(defaultSubPage)
-
     page.makeValueBinding(context.btnContols[3].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRewind).setSubPage(defaultSubPage)
     page.makeValueBinding(context.btnContols[5].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mForward).setSubPage(defaultSubPage)
     page.makeActionBinding(context.btnContols[4].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mNextTrack).setSubPage(defaultSubPage)
     page.makeActionBinding(context.btnContols[1].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mPrevTrack).setSubPage(defaultSubPage)
-
-    page.makeCommandBinding(context.btnContols[1].d.mSurfaceValue, 'Marker', 'Insert Marker').setSubPage(markerSubPage)
-    page.makeCommandBinding(context.btnContols[3].d.mSurfaceValue, 'Transport', 'Locate Previous Event').setSubPage(markerSubPage)
-    page.makeCommandBinding(context.btnContols[5].d.mSurfaceValue, 'Transport', 'Locate Next Event').setSubPage(markerSubPage)
-    page.makeCommandBinding(context.btnContols[4].d.mSurfaceValue, 'Transport', '').setSubPage(markerSubPage)
-
-    page.makeCommandBinding(context.btnContols[5].d.mSurfaceValue, 'Zoom', 'Zoom In').setSubPage(zoomSubPage)
-    page.makeCommandBinding(context.btnContols[3].d.mSurfaceValue, 'Zoom', 'Zoom Out').setSubPage(zoomSubPage)
-    page.makeCommandBinding(context.btnContols[4].d.mSurfaceValue, 'Zoom', 'Zoom In Vertically').setSubPage(zoomSubPage)
-    page.makeCommandBinding(context.btnContols[1].d.mSurfaceValue, 'Zoom', 'Zoom Out Vertically').setSubPage(zoomSubPage)
-
-
     var dummyZoomBtn = deviceDriver.mSurface.makeButton(context.btnsL1U[0].x, context.btnsL1U[0].y, context.btnsL1U[0].w, context.btnsL1U[0].h)
     page.makeCommandBinding(dummyZoomBtn.mSurfaceValue, 'Tool', 'Zoom Tool').setSubPage(defaultSubPage) //dummy bind
         
@@ -358,10 +343,6 @@ function makePageMixer(deviceDriver, page, context) {
     }
 
     page.makeActionBinding(context.defaultVariable, defaultSubPage.mAction.mActivate)
-    page.makeActionBinding(context.zoomVariable, zoomSubPage.mAction.mActivate)
-    page.makeActionBinding(context.markerVariable, markerSubPage.mAction.mActivate)
-
-
     page.makeCommandBinding(context.btnContols[2].d.mSurfaceValue, 'Devices', 'Mixer').setSubPage(defaultSubPage)
     page.makeCommandBinding(context.btnsL1U[2].d.mSurfaceValue, 'Edit', 'Undo').setSubPage(defaultSubPage)
     page.makeCommandBinding(context.btnsL1U[3].d.mSurfaceValue, 'Edit', 'Redo').setSubPage(defaultSubPage)
@@ -375,6 +356,38 @@ function makePageMixer(deviceDriver, page, context) {
     page.makeValueBinding(context.btnsL1L[6].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().setSubPage(defaultSubPage)
     page.makeCommandBinding(context.btnsL1L[7].d.mSurfaceValue, 'Edit', 'Unmute All').setSubPage(defaultSubPage)
     page.makeCommandBinding(context.btnsL1L[8].d.mSurfaceValue, 'Edit', 'Deactivate All Solo').setSubPage(defaultSubPage)
+       
+}
+
+/**
+ * 
+ * @param {MR_DeviceDriver} deviceDriver 
+ * @param {MR_FactoryMappingPage} page 
+ * @param {object} context 
+ * @returns
+ */
+function makePageMixer(deviceDriver, page, context) {
+    var subPageArea = page.makeSubPageArea('mixer')
+    var zoomSubPage = subPageArea.makeSubPage('zoom')
+    var markerSubPage = subPageArea.makeSubPage('marker')
+    var defaultSubPage = subPageArea.makeSubPage('default')
+
+    createTransportAndContols(deviceDriver, page, defaultSubPage, context)
+
+
+    page.makeCommandBinding(context.btnContols[1].d.mSurfaceValue, 'Marker', 'Insert Marker').setSubPage(markerSubPage)
+    page.makeCommandBinding(context.btnContols[3].d.mSurfaceValue, 'Transport', 'Locate Previous Event').setSubPage(markerSubPage)
+    page.makeCommandBinding(context.btnContols[5].d.mSurfaceValue, 'Transport', 'Locate Next Event').setSubPage(markerSubPage)
+    page.makeCommandBinding(context.btnContols[4].d.mSurfaceValue, 'Transport', '').setSubPage(markerSubPage)
+
+    page.makeCommandBinding(context.btnContols[5].d.mSurfaceValue, 'Zoom', 'Zoom In').setSubPage(zoomSubPage)
+    page.makeCommandBinding(context.btnContols[3].d.mSurfaceValue, 'Zoom', 'Zoom Out').setSubPage(zoomSubPage)
+    page.makeCommandBinding(context.btnContols[4].d.mSurfaceValue, 'Zoom', 'Zoom In Vertically').setSubPage(zoomSubPage)
+    page.makeCommandBinding(context.btnContols[1].d.mSurfaceValue, 'Zoom', 'Zoom Out Vertically').setSubPage(zoomSubPage)
+
+
+    page.makeActionBinding(context.zoomVariable, zoomSubPage.mAction.mActivate)
+    page.makeActionBinding(context.markerVariable, markerSubPage.mAction.mActivate)
 
     var hostMixerBankZone = page.mHostAccess.mMixConsole.makeMixerBankZone('AudioInstrBanks')
         .includeAudioChannels()
@@ -470,6 +483,7 @@ function makeSubPageEQBand(page, subPageArea, subPageEQ, band, idx, subPageName,
     }
 
     subPageEQBand.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[idx].note, 127])
     }.bind({ context })
 
@@ -490,46 +504,7 @@ function makePageEQ(deviceDriver, page, context) {
     var subPageArea = page.makeSubPageArea('EQ')
     var defaultSubPage = subPageArea.makeSubPage('default')
 
-    
-    //page.makeActionBinding(context.btnPageUp.mSurfaceValue, deviceDriver.mAction.mPrevPage).setSubPage(defaultSubPage)
-    //page.makeActionBinding(context.btnPageDown.mSurfaceValue, deviceDriver.mAction.mNextPage).setSubPage
-
-    page.makeValueBinding(context.btnForward.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mForward).setSubPage(defaultSubPage)
-    page.makeValueBinding(context.btnRewind.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRewind).setSubPage(defaultSubPage)
-    page.makeValueBinding(context.btnStart.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mStart).setTypeToggle().setSubPage(defaultSubPage)
-    page.makeValueBinding(context.btnStop.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mStop).setTypeToggle().setSubPage(defaultSubPage)
-    page.makeValueBinding(context.btnRecord.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRecord).setTypeToggle().setSubPage(defaultSubPage)
-    page.makeCommandBinding(context.btnRight.d.mSurfaceValue, 'Transport', '').setSubPage(defaultSubPage)
-    page.makeCommandBinding(context.btnLeft.d.mSurfaceValue, 'Transport', '').setSubPage(defaultSubPage)
-    page.makeActionBinding(context.btnDown.d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mNextTrack).setSubPage(defaultSubPage)
-    page.makeActionBinding(context.btnUp.d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mPrevTrack).setSubPage(defaultSubPage)
-
-    page.makeValueBinding(context.btnContols[3].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRewind).setSubPage(defaultSubPage)
-    page.makeValueBinding(context.btnContols[5].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mForward).setSubPage(defaultSubPage)
-    page.makeActionBinding(context.btnContols[4].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mNextTrack).setSubPage(defaultSubPage)
-    page.makeActionBinding(context.btnContols[1].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mPrevTrack).setSubPage(defaultSubPage)
-    var hostMixerBankZone = page.mHostAccess.mMixConsole.makeMixerBankZone('AudioInstrBanks')
-        .includeAudioChannels()
-        .includeInstrumentChannels()
-        .setFollowVisibility(true)
-
-    page.makeActionBinding(context.btnBankPrev.d.mSurfaceValue, hostMixerBankZone.mAction.mPrevBank).setSubPage(defaultSubPage)
-    page.makeActionBinding(context.btnBankNext.d.mSurfaceValue, hostMixerBankZone.mAction.mNextBank).setSubPage(defaultSubPage)
-    
-    page.makeCommandBinding(context.btnContols[2].d.mSurfaceValue, 'Devices', 'Mixer').setSubPage(defaultSubPage)
-    page.makeCommandBinding(context.btnsL1U[2].d.mSurfaceValue, 'Edit', 'Undo').setSubPage(defaultSubPage)
-    page.makeCommandBinding(context.btnsL1U[3].d.mSurfaceValue, 'Edit', 'Redo').setSubPage(defaultSubPage)
-    page.makeValueBinding(context.btnsL1U[4].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mMonitorEnable).setTypeToggle().setSubPage(defaultSubPage)
-    page.makeValueBinding(context.btnsL1U[5].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mMetronomeActive).setTypeToggle().setSubPage(defaultSubPage)
-    page.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mCycleActive).setTypeToggle().setSubPage(defaultSubPage)
-    page.makeValueBinding(context.btnsL1U[7].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mAutomationRead).setTypeToggle().setSubPage(defaultSubPage)
-    page.makeValueBinding(context.btnsL1U[8].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mAutomationWrite).setTypeToggle().setSubPage(defaultSubPage)
-
-    page.makeValueBinding(context.btnsL1L[5].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mEditorOpen).setTypeToggle().setSubPage(defaultSubPage)
-    page.makeValueBinding(context.btnsL1L[6].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().setSubPage(defaultSubPage)
-    page.makeCommandBinding(context.btnsL1L[7].d.mSurfaceValue, 'Edit', 'Unmute All').setSubPage(defaultSubPage)
-    page.makeCommandBinding(context.btnsL1L[8].d.mSurfaceValue, 'Edit', 'Deactivate All Solo').setSubPage(defaultSubPage)
-
+    createTransportAndContols(deviceDriver, page, defaultSubPage, context)
 
     var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
     makeSubPagePrefilter(page, subPageArea, defaultSubPage, selectedTrackChannel.mPreFilter, context)
@@ -537,12 +512,15 @@ function makePageEQ(deviceDriver, page, context) {
     makeSubPageEQBand(page, subPageArea, defaultSubPage, selectedTrackChannel.mChannelEQ.mBand2, 2, 'BandEQ2', context)
     makeSubPageEQBand(page, subPageArea, defaultSubPage, selectedTrackChannel.mChannelEQ.mBand3, 3, 'BandEQ3', context)
     makeSubPageEQBand(page, subPageArea, defaultSubPage, selectedTrackChannel.mChannelEQ.mBand4, 4, 'BandEQ4', context)
-
     page.makeCommandBinding(context.btnsRow4[5].d.mSurfaceValue, 'Process Project Logical Editor', 'Toggle EQ Bypass of Selected Tracks').setSubPage(defaultSubPage)
 
     page.mOnActivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[0].note, 127])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 127])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
     }.bind({ context })
 
     page.mOnDeactivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
