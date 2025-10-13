@@ -46,6 +46,11 @@ context.zoomVariable = deviceDriver.mSurface.makeCustomValueVariable('zoom')
 deviceDriver.mOnActivate = function (activeDevice) {
     console.log('Icontrols - iCON - Activated')
     if (isSurfaceElementsInitialized) {
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[0].note, 0])
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[1].note, 0])
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[0].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow2[0].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow3[0].note, 0])
     }
     activeDevice.setState('lastTime', Date.now().toString())
 }
@@ -298,8 +303,8 @@ function makePageMixer(deviceDriver, page, context) {
     page.makeActionBinding(context.btnDown.d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mNextTrack).setSubPage(defaultSubPage)
     page.makeActionBinding(context.btnUp.d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mPrevTrack).setSubPage(defaultSubPage)
 
-    page.makeCommandBinding(context.btnContols[3].d.mSurfaceValue, 'Transport', '').setSubPage(defaultSubPage)
-    page.makeCommandBinding(context.btnContols[5].d.mSurfaceValue, 'Transport', '').setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnContols[3].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRewind).setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnContols[5].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mForward).setSubPage(defaultSubPage)
     page.makeActionBinding(context.btnContols[4].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mNextTrack).setSubPage(defaultSubPage)
     page.makeActionBinding(context.btnContols[1].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mPrevTrack).setSubPage(defaultSubPage)
 
@@ -357,7 +362,6 @@ function makePageMixer(deviceDriver, page, context) {
     page.makeActionBinding(context.markerVariable, markerSubPage.mAction.mActivate)
 
 
-
     page.makeCommandBinding(context.btnContols[2].d.mSurfaceValue, 'Devices', 'Mixer').setSubPage(defaultSubPage)
     page.makeCommandBinding(context.btnsL1U[2].d.mSurfaceValue, 'Edit', 'Undo').setSubPage(defaultSubPage)
     page.makeCommandBinding(context.btnsL1U[3].d.mSurfaceValue, 'Edit', 'Redo').setSubPage(defaultSubPage)
@@ -403,8 +407,10 @@ function makePageMixer(deviceDriver, page, context) {
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[0].note, 0])
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[1].note, 0])
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[0].note, 0])
+        context.defaultVariable.setProcessValue(activeDevice, 1)
+        context.zoomVariable.setProcessValue(activeDevice, 0)
+        context.markerVariable.setProcessValue(activeDevice, 0)
     }.bind({ context })
-
 }
 
 
@@ -422,9 +428,11 @@ function makeSubPagePrefilter(page, subPageArea, subPageEQ, preFilter, context) 
     page.makeValueBinding(context.btnsRow1[0].d.mSurfaceValue, preFilter.mBypass).setTypeToggle().setSubPage(subPageEQ)
     page.makeActionBinding(context.btnsRow4[0].d.mSurfaceValue, subPagePreFilter.mAction.mActivate).setSubPage(subPageEQ)
 
+    page.makeValueBinding(context.btnsRow2[0].d.mSurfaceValue, preFilter.mHighCutOn).setTypeToggle().setSubPage(subPagePreFilter)
     page.makeValueBinding(context.knobs1[0].mSurfaceValue, preFilter.mHighCutOn).setValueTakeOverModeJump().setSubPage(subPagePreFilter)
     page.makeValueBinding(context.knobs1[1].mSurfaceValue, preFilter.mHighCutFreq).setSubPage(subPagePreFilter)
     page.makeValueBinding(context.knobs1[2].mSurfaceValue, preFilter.mHighCutSlope).setSubPage(subPagePreFilter)
+    page.makeValueBinding(context.btnsRow3[0].d.mSurfaceValue, preFilter.mLowCutOn).setTypeToggle().setSubPage(subPagePreFilter)
     page.makeValueBinding(context.knobs1[3].mSurfaceValue, preFilter.mLowCutOn).setValueTakeOverModeJump().setSubPage(subPagePreFilter)
     page.makeValueBinding(context.knobs1[4].mSurfaceValue, preFilter.mLowCutFreq).setSubPage(subPagePreFilter)
     page.makeValueBinding(context.knobs1[5].mSurfaceValue, preFilter.mLowCutSlope).setSubPage(subPagePreFilter)
@@ -432,6 +440,10 @@ function makeSubPagePrefilter(page, subPageArea, subPageEQ, preFilter, context) 
     page.makeValueBinding(context.knobs1[7].mSurfaceValue, preFilter.mPhaseSwitch).setSubPage(subPagePreFilter)
     subPagePreFilter.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 127])
+    }.bind({ context })
+
+    subPagePreFilter.mOnDeactivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
     }.bind({ context })
 }
 
@@ -449,18 +461,22 @@ function makeSubPageEQBand(page, subPageArea, subPageEQ, band, idx, subPageName,
     var subPageEQBand = subPageArea.makeSubPage(subPageName)
     page.makeValueBinding(context.btnsRow1[idx].d.mSurfaceValue, band.mOn).setTypeToggle().setSubPage(subPageEQ)
     page.makeActionBinding(context.btnsRow4[idx].d.mSurfaceValue, subPageEQBand.mAction.mActivate).setSubPage(subPageEQ)
-    page.makeValueBinding(context.knobs1[0].mSurfaceValue, band.mFilterType).setSubPage(subPageEQBand)
+    page.makeValueBinding(context.knobs1[0].mSurfaceValue, band.mFilterType).setValueTakeOverModeJump().setSubPage(subPageEQBand)
     page.makeValueBinding(context.knobs1[1].mSurfaceValue, band.mGain).setSubPage(subPageEQBand)
     page.makeValueBinding(context.knobs1[2].mSurfaceValue, band.mFreq).setSubPage(subPageEQBand)
     page.makeValueBinding(context.knobs1[3].mSurfaceValue, band.mQ).setSubPage(subPageEQBand)
-    for (var i = 4; i < context.numStrips; i++) {
-        page.makeCommandBinding(context.knobs[i].mSurfaceValue, 'Video', 'Mute all vdeo tracks').setSubPage(subPageEQBand) //dummy bind
+    for (var i = 4; i < context.numStrips1; i++) {
+        page.makeCommandBinding(context.knobs1[i].mSurfaceValue, 'Video', 'Mute all vdeo tracks').setSubPage(subPageEQBand) //dummy bind
     }
 
     subPageEQBand.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
-        console.log(subPageName + ' Activated')
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[idx].note, 127])
     }.bind({ context })
+
+    subPageEQBand.mOnDeactivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[idx].note, 0])
+    }.bind({ context })
+
 }
 
 /**
@@ -471,31 +487,66 @@ function makeSubPageEQBand(page, subPageArea, subPageEQ, band, idx, subPageName,
  * @returns
  */
 function makePageEQ(deviceDriver, page, context) {
-    var subPageArea = page.makeSubPageArea('mixer')
-    var subPageEQ = subPageArea.makeSubPage('EQSubPage')
+    var subPageArea = page.makeSubPageArea('EQ')
+    var defaultSubPage = subPageArea.makeSubPage('default')
+
+    
+    //page.makeActionBinding(context.btnPageUp.mSurfaceValue, deviceDriver.mAction.mPrevPage).setSubPage(defaultSubPage)
+    //page.makeActionBinding(context.btnPageDown.mSurfaceValue, deviceDriver.mAction.mNextPage).setSubPage
+
+    page.makeValueBinding(context.btnForward.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mForward).setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnRewind.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRewind).setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnStart.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mStart).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnStop.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mStop).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnRecord.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRecord).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeCommandBinding(context.btnRight.d.mSurfaceValue, 'Transport', '').setSubPage(defaultSubPage)
+    page.makeCommandBinding(context.btnLeft.d.mSurfaceValue, 'Transport', '').setSubPage(defaultSubPage)
+    page.makeActionBinding(context.btnDown.d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mNextTrack).setSubPage(defaultSubPage)
+    page.makeActionBinding(context.btnUp.d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mPrevTrack).setSubPage(defaultSubPage)
+
+    page.makeValueBinding(context.btnContols[3].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRewind).setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnContols[5].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mForward).setSubPage(defaultSubPage)
+    page.makeActionBinding(context.btnContols[4].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mNextTrack).setSubPage(defaultSubPage)
+    page.makeActionBinding(context.btnContols[1].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mPrevTrack).setSubPage(defaultSubPage)
+    var hostMixerBankZone = page.mHostAccess.mMixConsole.makeMixerBankZone('AudioInstrBanks')
+        .includeAudioChannels()
+        .includeInstrumentChannels()
+        .setFollowVisibility(true)
+
+    page.makeActionBinding(context.btnBankPrev.d.mSurfaceValue, hostMixerBankZone.mAction.mPrevBank).setSubPage(defaultSubPage)
+    page.makeActionBinding(context.btnBankNext.d.mSurfaceValue, hostMixerBankZone.mAction.mNextBank).setSubPage(defaultSubPage)
+    
+    page.makeCommandBinding(context.btnContols[2].d.mSurfaceValue, 'Devices', 'Mixer').setSubPage(defaultSubPage)
+    page.makeCommandBinding(context.btnsL1U[2].d.mSurfaceValue, 'Edit', 'Undo').setSubPage(defaultSubPage)
+    page.makeCommandBinding(context.btnsL1U[3].d.mSurfaceValue, 'Edit', 'Redo').setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnsL1U[4].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mMonitorEnable).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnsL1U[5].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mMetronomeActive).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mCycleActive).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnsL1U[7].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mAutomationRead).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnsL1U[8].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mAutomationWrite).setTypeToggle().setSubPage(defaultSubPage)
+
+    page.makeValueBinding(context.btnsL1L[5].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mEditorOpen).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnsL1L[6].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeCommandBinding(context.btnsL1L[7].d.mSurfaceValue, 'Edit', 'Unmute All').setSubPage(defaultSubPage)
+    page.makeCommandBinding(context.btnsL1L[8].d.mSurfaceValue, 'Edit', 'Deactivate All Solo').setSubPage(defaultSubPage)
+
 
     var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
-    makeSubPagePrefilter(page, subPageArea, subPageEQ, selectedTrackChannel.mPreFilter, context)
-    makeSubPageEQBand(page, subPageArea, subPageEQ, selectedTrackChannel.mChannelEQ.mBand1, 1, 'BandEQ1', context)
-    makeSubPageEQBand(page, subPageArea, subPageEQ, selectedTrackChannel.mChannelEQ.mBand2, 2, 'BandEQ2', context)
-    makeSubPageEQBand(page, subPageArea, subPageEQ, selectedTrackChannel.mChannelEQ.mBand3, 3, 'BandEQ3', context)
-    makeSubPageEQBand(page, subPageArea, subPageEQ, selectedTrackChannel.mChannelEQ.mBand4, 4, 'BandEQ4', context)
+    makeSubPagePrefilter(page, subPageArea, defaultSubPage, selectedTrackChannel.mPreFilter, context)
+    makeSubPageEQBand(page, subPageArea, defaultSubPage, selectedTrackChannel.mChannelEQ.mBand1, 1, 'BandEQ1', context)
+    makeSubPageEQBand(page, subPageArea, defaultSubPage, selectedTrackChannel.mChannelEQ.mBand2, 2, 'BandEQ2', context)
+    makeSubPageEQBand(page, subPageArea, defaultSubPage, selectedTrackChannel.mChannelEQ.mBand3, 3, 'BandEQ3', context)
+    makeSubPageEQBand(page, subPageArea, defaultSubPage, selectedTrackChannel.mChannelEQ.mBand4, 4, 'BandEQ4', context)
 
-    page.makeValueBinding(context.btnsRow1[6].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mAutomationRead).setTypeToggle().setSubPage(subPageEQ)
-    page.makeValueBinding(context.btnsRow1[7].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mAutomationWrite).setTypeToggle().setSubPage(subPageEQ)
-    page.makeValueBinding(context.btnsRow2[6].d.mSurfaceValue, selectedTrackChannel.mValue.mEditorOpen).setTypeToggle().setSubPage(subPageEQ)
-    page.makeValueBinding(context.btnsRow2[7].d.mSurfaceValue, selectedTrackChannel.mValue.mInstrumentOpen).setTypeToggle().setSubPage(subPageEQ)
-
-    page.makeValueBinding(context.btnsRow3[6].d.mSurfaceValue, selectedTrackChannel.mValue.mMute).setTypeToggle().setSubPage(subPageEQ)
-    page.makeValueBinding(context.btnsRow3[7].d.mSurfaceValue, selectedTrackChannel.mValue.mSolo).setTypeToggle().setSubPage(subPageEQ)
-    page.makeValueBinding(context.btnsRow4[6].d.mSurfaceValue, selectedTrackChannel.mValue.mMonitorEnable).setTypeToggle().setSubPage(subPageEQ)
-    page.makeValueBinding(context.btnsRow4[7].d.mSurfaceValue, selectedTrackChannel.mValue.mRecordEnable).setTypeToggle().setSubPage(subPageEQ)
-
-    page.makeCommandBinding(context.btnsRow4[5].d.mSurfaceValue, 'Process Project Logical Editor', 'Toggle EQ Bypass of Selected Tracks').setSubPage(subPageEQ)
+    page.makeCommandBinding(context.btnsRow4[5].d.mSurfaceValue, 'Process Project Logical Editor', 'Toggle EQ Bypass of Selected Tracks').setSubPage(defaultSubPage)
 
     page.mOnActivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
-        console.log('EQ Page Activated')
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[0].note, 127])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 127])
+    }.bind({ context })
+
+    page.mOnDeactivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[0].note, 0])
     }.bind({ context })
 
 }
