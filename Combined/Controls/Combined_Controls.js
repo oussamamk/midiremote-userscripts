@@ -252,8 +252,8 @@ function createSurfaceElements2(deviceDriver, context) {
         context.faders2[i] = makeFader2(deviceDriver, midiInput, midiOutput, i, 20 + i, x + i * 7, y + 7, 3, 18)
         context.btnsL1U[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 0 + i, x + i * 7 - 3, y + 10, w, h, true)
         context.btnsL1L[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 9 + i, x + i * 7 - 3, y + 14, w, h, true)
-        context.btnsL2U[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 18 + i, x + i * 7 - 3, y + 18, w, h, true)
-        context.btnsL2L[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 27 + i, x + i * 7 - 3, y + 22, w, h, true)
+        // context.btnsL2U[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 18 + i, x + i * 7 - 3, y + 18, w, h, true)
+        // context.btnsL2L[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 27 + i, x + i * 7 - 3, y + 22, w, h, true)
         // context.btnsL3U[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 36 + i, x + i * 7 - 3, y + 26, w, h, true)
         // context.btnsL3L[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 45 + i, x + i * 7 - 3, y + 30, w, h, true)
         // context.btnsL4U[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 54 + i, x + i * 7 - 3, y + 34, w, h, true)
@@ -494,7 +494,12 @@ function makeSubPageEQBand(page, defaultSubPage, band, idx, context) {
                     context.btnsRow4[idx].customValue = 7
                     break
                 default:
+                    if (arg2 === null || arg2 === "") {
+                        break
+                    }
+
                     console.log('Unkown filter ' + idx + ' type: ' + arg2 + " ," + arg4);
+                    console.assert()
                     context.btnsRow4[idx].customValue = 0
                     break
             }
@@ -509,7 +514,11 @@ function makeSubPageEQBand(page, defaultSubPage, band, idx, context) {
                     break
 
                 default:
+                    if (arg2 === null || arg2 === "") {
+                        break
+                    }
                     console.log('Unkown filter ' + idx + ' type: ' + arg2 + " ," + arg4);
+                    console.assert()
                     context.btnsRow4[idx].customValue = 0
                     break
             }
@@ -524,11 +533,15 @@ function makeSubPageEQBand(page, defaultSubPage, band, idx, context) {
                     break
 
                 default:
+                    if (arg2 === null || arg2 === "") {
+                        break
+                    }
                     console.log('Unkown filter ' + idx + ' type: ' + arg2 + " ," + arg4);
+                    console.assert()
                     context.btnsRow4[idx].customValue = 0
                     break
             }
-        } else if (idx === 3) {
+        } else if (idx === 4) {
             context.btnsRow4[idx].customValueMax = 7;
             switch (arg2) {
                 case 'Parametric I':
@@ -565,7 +578,11 @@ function makeSubPageEQBand(page, defaultSubPage, band, idx, context) {
                     break
 
                 default:
+                    if (arg2 === null || arg2 === "") {
+                        break
+                    }
                     console.log('Unkown filter ' + idx + ' type: ' + arg2 + " ," + arg4);
+                    console.assert()
                     context.btnsRow4[idx].customValue = 0
                     break
             }
@@ -619,6 +636,8 @@ function makePageEQ(deviceDriver, page, context) {
 
     page.mOnActivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[0].note, 127])
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[1].note, 0])
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[2].note, 0])
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[0].note, 0])
     }.bind({ context })
 
@@ -645,6 +664,10 @@ function makePageEQ(deviceDriver, page, context) {
 function makePageCueSends(deviceDriver, page, context) {
     var subPageArea = page.makeSubPageArea('CueSends')
     var defaultSubPage = subPageArea.makeSubPage('default')
+    var sendsSubPage = subPageArea.makeSubPage('sends')
+
+    page.makeActionBinding(context.btnsL1U[0].d.mSurfaceValue, sendsSubPage.mAction.mActivate).setSubPage(defaultSubPage)
+    page.makeActionBinding(context.btnsL1U[0].d.mSurfaceValue, defaultSubPage.mAction.mActivate).setSubPage(sendsSubPage)
 
     createTransportAndContols(deviceDriver, page, defaultSubPage, context)
 
@@ -658,12 +681,209 @@ function makePageCueSends(deviceDriver, page, context) {
         page.makeValueBinding(context.knobs1[idx * 2 + 1].mSurfaceValue, cueSendSlot.mLevel).setSubPage(defaultSubPage)
     }
 
+    for (var idx = 0; idx < 8; idx++) {
+        var sendSlot = selectedTrackChannel.mSends.getByIndex(idx)
+        page.makeValueBinding(context.btnsRow1[idx].d.mSurfaceValue, sendSlot.mOn).setTypeToggle().setSubPage(sendsSubPage)
+        page.makeValueBinding(context.btnsRow2[idx].d.mSurfaceValue, sendSlot.mPrePost).setTypeToggle().setSubPage(sendsSubPage)
+        page.makeValueBinding(context.knobs1[idx].mSurfaceValue, sendSlot.mLevel).setSubPage(sendsSubPage)
+    }
+
     page.mOnActivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[0].note, 0])
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[1].note, 127])
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[2].note, 0])
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[0].note, 0])
     }.bind({ context })
 
     page.mOnDeactivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[1].note, 0])
+    }.bind({ context })
+
+    sendsSubPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[0].note, 127])
+    }.bind({ context })
+
+    sendsSubPage.mOnDeactivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[0].note, 0])
+    }.bind({ context })
+}
+
+
+/**
+ * 
+ * @param {MR_FactoryMappingPage} page 
+ * @param {MR_SubPage} subPage
+ * @param {MR_HostValueUndefined} customVar
+ * @parm {MR_HostObject} stripEffect
+ * @param {object} context
+ * @param {number} idx
+ * @returns
+ */
+function makeStripEffectBinding(page, subPage, customVar, stripEffectType, context, idx) {
+    var dam = page.mHostAccess.makeDirectAccess(stripEffectType);
+
+    page.makeValueBinding(context.btnsRow1[idx].d.mSurfaceValue, stripEffectType.mOn).setTypeToggle().setSubPage(subPage)
+    page.makeValueBinding(context.btnsRow2[idx].d.mSurfaceValue, stripEffectType.mBypass).setTypeToggle().setSubPage(subPage)
+
+    var b = page.makeValueBinding(context.btnsRow3[idx].d.mSurfaceValue, customVar).setSubPage(subPage)
+    page.makeValueBinding(context.btnsRow3[idx].d.mSurfaceValue, customVar).mOnValueChange = function (activeDevice, activeMapping, arg2) {
+        if (arg2 === 0) {
+          var baseID = dam.getBaseObjectID(activeMapping);
+          var numChilds = dam.getNumberOfChildObjects(activeMapping, baseID)
+          var tag = 4102;
+          var val = 1
+          if (numChilds > 0) {
+              tag = 4125;
+              val = 0
+          }
+          dam.setParameterProcessValue(activeMapping, baseID, tag, val);
+        }
+    }
+}
+
+/**
+ * 
+ * @param {MR_DeviceDriver} deviceDriver 
+ * @param {MR_FactoryMappingPage} page 
+ * @param {object} context
+ * @returns
+ */
+function makePageChannelStrip(deviceDriver, page, context) {
+    var subPageArea = page.makeSubPageArea('ChannelStrip')
+    var defaultSubPage = subPageArea.makeSubPage('default')
+    var gateSubPage = subPageArea.makeSubPage('gate')
+    var compressorSubPage = subPageArea.makeSubPage('compressor')
+    var toolsSubPage = subPageArea.makeSubPage('tools')
+    var saturatorubPage = subPageArea.makeSubPage('saturator')
+    var limiterSubPage = subPageArea.makeSubPage('limiter')
+
+    page.makeActionBinding(context.btnsRow4[0].d.mSurfaceValue, gateSubPage.mAction.mActivate).setSubPage(defaultSubPage)
+    page.makeActionBinding(context.btnsRow4[1].d.mSurfaceValue, compressorSubPage.mAction.mActivate).setSubPage(defaultSubPage)
+    page.makeActionBinding(context.btnsRow4[2].d.mSurfaceValue, toolsSubPage.mAction.mActivate).setSubPage(defaultSubPage)
+    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, saturatorubPage.mAction.mActivate).setSubPage(defaultSubPage)
+    page.makeActionBinding(context.btnsRow4[4].d.mSurfaceValue, limiterSubPage.mAction.mActivate).setSubPage(defaultSubPage)
+
+    page.makeActionBinding(context.btnsRow4[0].d.mSurfaceValue, defaultSubPage.mAction.mActivate).setSubPage(gateSubPage)
+    page.makeActionBinding(context.btnsRow4[1].d.mSurfaceValue, compressorSubPage.mAction.mActivate).setSubPage(gateSubPage)
+    page.makeActionBinding(context.btnsRow4[2].d.mSurfaceValue, toolsSubPage.mAction.mActivate).setSubPage(gateSubPage)
+    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, saturatorubPage.mAction.mActivate).setSubPage(gateSubPage)
+    page.makeActionBinding(context.btnsRow4[4].d.mSurfaceValue, limiterSubPage.mAction.mActivate).setSubPage(gateSubPage)
+
+    page.makeActionBinding(context.btnsRow4[0].d.mSurfaceValue, gateSubPage.mAction.mActivate).setSubPage(compressorSubPage)
+    page.makeActionBinding(context.btnsRow4[1].d.mSurfaceValue, defaultSubPage.mAction.mActivate).setSubPage(compressorSubPage)
+    page.makeActionBinding(context.btnsRow4[2].d.mSurfaceValue, toolsSubPage.mAction.mActivate).setSubPage(compressorSubPage)
+    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, saturatorubPage.mAction.mActivate).setSubPage(compressorSubPage)
+    page.makeActionBinding(context.btnsRow4[4].d.mSurfaceValue, limiterSubPage.mAction.mActivate).setSubPage(compressorSubPage)
+
+    page.makeActionBinding(context.btnsRow4[0].d.mSurfaceValue, gateSubPage.mAction.mActivate).setSubPage(toolsSubPage)
+    page.makeActionBinding(context.btnsRow4[1].d.mSurfaceValue, compressorSubPage.mAction.mActivate).setSubPage(toolsSubPage)
+    page.makeActionBinding(context.btnsRow4[2].d.mSurfaceValue, defaultSubPage.mAction.mActivate).setSubPage(toolsSubPage)
+    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, saturatorubPage.mAction.mActivate).setSubPage(toolsSubPage)
+    page.makeActionBinding(context.btnsRow4[4].d.mSurfaceValue, limiterSubPage.mAction.mActivate).setSubPage(toolsSubPage)
+
+    page.makeActionBinding(context.btnsRow4[0].d.mSurfaceValue, gateSubPage.mAction.mActivate).setSubPage(saturatorubPage)
+    page.makeActionBinding(context.btnsRow4[1].d.mSurfaceValue, compressorSubPage.mAction.mActivate).setSubPage(saturatorubPage)
+    page.makeActionBinding(context.btnsRow4[2].d.mSurfaceValue, toolsSubPage.mAction.mActivate).setSubPage(saturatorubPage)
+    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, defaultSubPage.mAction.mActivate).setSubPage(saturatorubPage)
+    page.makeActionBinding(context.btnsRow4[4].d.mSurfaceValue, limiterSubPage.mAction.mActivate).setSubPage(saturatorubPage)
+
+    page.makeActionBinding(context.btnsRow4[0].d.mSurfaceValue, gateSubPage.mAction.mActivate).setSubPage(limiterSubPage)
+    page.makeActionBinding(context.btnsRow4[1].d.mSurfaceValue, compressorSubPage.mAction.mActivate).setSubPage(limiterSubPage)
+    page.makeActionBinding(context.btnsRow4[2].d.mSurfaceValue, toolsSubPage.mAction.mActivate).setSubPage(limiterSubPage)
+    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, saturatorubPage.mAction.mActivate).setSubPage(limiterSubPage)
+    page.makeActionBinding(context.btnsRow4[4].d.mSurfaceValue, defaultSubPage.mAction.mActivate).setSubPage(limiterSubPage)
+
+
+    createTransportAndContols(deviceDriver, page, defaultSubPage, context)
+    var customVar =page.mCustom.makeHostValueVariable("customVar");
+    var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
+    var stripEffects = selectedTrackChannel.mInsertAndStripEffects.mStripEffects
+    var types = ['mGate', 'mCompressor', 'mTools', 'mSaturator', 'mLimiter'];
+
+    for (var i = 0; i < 5; i++) {
+        var type = types[i];
+        makeStripEffectBinding(page, defaultSubPage, customVar, stripEffects[type], context, i)
+    }
+
+    for (var i = 0; i < context.numStrips2; i++) {
+        var gate = stripEffects.mGate.mParameterBankZone.makeParameterValue()
+        var compressor = stripEffects.mCompressor.mParameterBankZone.makeParameterValue()
+        var tools = stripEffects.mTools.mParameterBankZone.makeParameterValue()
+        var saturator = stripEffects.mSaturator.mParameterBankZone.makeParameterValue()
+        var limiter = stripEffects.mLimiter.mParameterBankZone.makeParameterValue()
+        page.makeValueBinding(context.knobs2[i].mSurfaceValue, gate).setSubPage(gateSubPage)
+        page.makeValueBinding(context.knobs2[i].mSurfaceValue, compressor).setSubPage(compressorSubPage)
+        page.makeValueBinding(context.knobs2[i].mSurfaceValue, tools).setSubPage(toolsSubPage)
+        page.makeValueBinding(context.knobs2[i].mSurfaceValue, saturator).setSubPage(saturatorubPage)
+        page.makeValueBinding(context.knobs2[i].mSurfaceValue, limiter).setSubPage(limiterSubPage)
+    }
+
+    for (var i = 0; i < context.numStrips1; i++) {
+        var gate = stripEffects.mGate.mParameterBankZone.makeParameterValue()
+        var compressor = stripEffects.mCompressor.mParameterBankZone.makeParameterValue()
+        var tools = stripEffects.mTools.mParameterBankZone.makeParameterValue()
+        var saturator = stripEffects.mSaturator.mParameterBankZone.makeParameterValue()
+        var limiter = stripEffects.mLimiter.mParameterBankZone.makeParameterValue()
+        page.makeValueBinding(context.knobs1[i].mSurfaceValue, gate).setSubPage(gateSubPage)
+        page.makeValueBinding(context.knobs1[i].mSurfaceValue, compressor).setSubPage(compressorSubPage)
+        page.makeValueBinding(context.knobs1[i].mSurfaceValue, tools).setSubPage(toolsSubPage)
+        page.makeValueBinding(context.knobs1[i].mSurfaceValue, saturator).setSubPage(saturatorubPage)
+        page.makeValueBinding(context.knobs1[i].mSurfaceValue, limiter).setSubPage(limiterSubPage)
+    }
+
+    page.mOnActivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[0].note, 0])
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[1].note, 0])
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[2].note, 127])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
+    }.bind({ context })
+
+    page.mOnDeactivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[2].note, 0])
+    }.bind({ context })
+
+    gateSubPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 127])
+    }.bind({ context })
+
+    gateSubPage.mOnDeactivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
+    }.bind({ context })
+
+    compressorSubPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 127])
+    }.bind({ context })
+
+    compressorSubPage.mOnDeactivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
+    }.bind({ context })
+
+    toolsSubPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 127])
+    }.bind({ context })
+
+    toolsSubPage.mOnDeactivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
+    }.bind({ context })
+
+    saturatorubPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 127])
+    }.bind({ context })
+
+    saturatorubPage.mOnDeactivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
+    }.bind({ context })
+
+    limiterSubPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 127])
+    }.bind({ context })
+
+    limiterSubPage.mOnDeactivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
     }.bind({ context })
 }
 
@@ -672,15 +892,24 @@ createSurfaceElements(deviceDriver, context)
 var mixerPage = deviceDriver.mMapping.makePage('Mixer')
 var eqPage = deviceDriver.mMapping.makePage('EQ')
 var cueSendsPage = deviceDriver.mMapping.makePage('CueSends')
+var channelStripPage = deviceDriver.mMapping.makePage('ChannelStrip')
 makePageMixer(deviceDriver, mixerPage, context)
 makePageEQ(deviceDriver, eqPage, context)
 makePageCueSends(deviceDriver, cueSendsPage, context)
+makePageChannelStrip(deviceDriver, channelStripPage, context)
 
 mixerPage.makeActionBinding(context.btnsL1L[0].d.mSurfaceValue, eqPage.mAction.mActivate)
 mixerPage.makeActionBinding(context.btnsL1L[1].d.mSurfaceValue, cueSendsPage.mAction.mActivate)
+mixerPage.makeActionBinding(context.btnsL1L[2].d.mSurfaceValue, channelStripPage.mAction.mActivate)
 
 eqPage.makeActionBinding(context.btnsL1L[0].d.mSurfaceValue, mixerPage.mAction.mActivate)
 eqPage.makeActionBinding(context.btnsL1L[1].d.mSurfaceValue, cueSendsPage.mAction.mActivate)
+eqPage.makeActionBinding(context.btnsL1L[2].d.mSurfaceValue, channelStripPage.mAction.mActivate)
 
 cueSendsPage.makeActionBinding(context.btnsL1L[0].d.mSurfaceValue, eqPage.mAction.mActivate)
 cueSendsPage.makeActionBinding(context.btnsL1L[1].d.mSurfaceValue, mixerPage.mAction.mActivate)
+cueSendsPage.makeActionBinding(context.btnsL1L[2].d.mSurfaceValue, channelStripPage.mAction.mActivate)
+
+channelStripPage.makeActionBinding(context.btnsL1L[0].d.mSurfaceValue, eqPage.mAction.mActivate)
+channelStripPage.makeActionBinding(context.btnsL1L[1].d.mSurfaceValue, cueSendsPage.mAction.mActivate)
+channelStripPage.makeActionBinding(context.btnsL1L[2].d.mSurfaceValue, mixerPage.mAction.mActivate)
