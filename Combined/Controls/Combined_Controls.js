@@ -250,8 +250,8 @@ function createSurfaceElements2(deviceDriver, context) {
     for (var i = 0; i < context.numStrips2; i++) {
         context.knobs2[i] = makeKnob2(deviceDriver, midiInput, midiOutput, i, 10 + i, x + i * 7, y + 2, 4, 4)
         context.faders2[i] = makeFader2(deviceDriver, midiInput, midiOutput, i, 20 + i, x + i * 7, y + 7, 3, 18)
-        context.btnsL1U[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 0 + i, x + i * 7 - 3, y + 10, w, h, true)
-        context.btnsL1L[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 9 + i, x + i * 7 - 3, y + 14, w, h, true)
+        context.btnsL1U[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 0 + i, x + i * 7 - 3, y + 18, w, h, true)
+        context.btnsL1L[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 9 + i, x + i * 7 - 3, y + 22, w, h, true)
         // context.btnsL2U[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 18 + i, x + i * 7 - 3, y + 18, w, h, true)
         // context.btnsL2L[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 27 + i, x + i * 7 - 3, y + 22, w, h, true)
         // context.btnsL3U[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 36 + i, x + i * 7 - 3, y + 26, w, h, true)
@@ -281,9 +281,6 @@ function createSurfaceElements(deviceDriver, context) {
  * @returns
  */
 function createTransportAndContols(deviceDriver, page, defaultSubPage, context) {
-    //page.makeActionBinding(context.btnPageUp.mSurfaceValue, deviceDriver.mAction.mPrevPage).setSubPage(defaultSubPage)
-    //page.makeActionBinding(context.btnPageDown.mSurfaceValue, deviceDriver.mAction.mNextPage).setSubPage
-
     page.makeValueBinding(context.btnForward.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mForward).setSubPage(defaultSubPage)
     page.makeValueBinding(context.btnRewind.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRewind).setSubPage(defaultSubPage)
     page.makeValueBinding(context.btnStart.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mStart).setTypeToggle().setSubPage(defaultSubPage)
@@ -297,45 +294,6 @@ function createTransportAndContols(deviceDriver, page, defaultSubPage, context) 
     page.makeValueBinding(context.btnContols[5].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mForward).setSubPage(defaultSubPage)
     page.makeActionBinding(context.btnContols[4].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mNextTrack).setSubPage(defaultSubPage)
     page.makeActionBinding(context.btnContols[1].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mPrevTrack).setSubPage(defaultSubPage)
-    var dummyZoomBtn = deviceDriver.mSurface.makeButton(context.btnsL1U[0].x, context.btnsL1U[0].y, context.btnsL1U[0].w, context.btnsL1U[0].h)
-    page.makeCommandBinding(dummyZoomBtn.mSurfaceValue, 'Tool', 'Zoom Tool').setSubPage(defaultSubPage) //dummy bind
-
-    //zoomButton -> subpage.zoomSubPage
-    context.btnsL1U[0].d.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value) {
-        if (value === 0) {
-            isZoom = !isZoom
-            if (isZoom) {
-                context.zoomVariable.setProcessValue(activeDevice, 1)
-                context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[0].note, 127])
-                context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[1].note, 0])
-            } else {
-                context.zoomVariable.setProcessValue(activeDevice, 0)
-                context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[0].note, 0])
-                context.defaultVariable.setProcessValue(activeDevice, 1)
-            }
-        }
-    }
-
-    var dummyMarkerBtn = deviceDriver.mSurface.makeButton(context.btnsL1U[1].x, context.btnsL1U[1].y, context.btnsL1U[1].w, context.btnsL1U[1].h)
-    page.makeCommandBinding(dummyMarkerBtn.mSurfaceValue, 'AddTrack', 'Marker').setSubPage(defaultSubPage) //dummy bind
-
-    //markerButton -> subpage.markerSubPage
-    context.btnsL1U[1].d.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value) {
-        if (value === 0) {
-            isMarker = !isMarker
-            if (isMarker) {
-                context.markerVariable.setProcessValue(activeDevice, 1)
-                context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[0].note, 0])
-                context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[1].note, 127])
-            } else {
-                context.markerVariable.setProcessValue(activeDevice, 0)
-                context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[1].note, 0])
-                context.defaultVariable.setProcessValue(activeDevice, 1)
-            }
-        }
-    }
-
-    page.makeActionBinding(context.defaultVariable, defaultSubPage.mAction.mActivate)
     page.makeCommandBinding(context.btnContols[2].d.mSurfaceValue, 'Devices', 'Mixer').setSubPage(defaultSubPage)
     page.makeCommandBinding(context.btnsL1U[2].d.mSurfaceValue, 'Edit', 'Undo').setSubPage(defaultSubPage)
     page.makeCommandBinding(context.btnsL1U[3].d.mSurfaceValue, 'Edit', 'Redo').setSubPage(defaultSubPage)
@@ -344,12 +302,11 @@ function createTransportAndContols(deviceDriver, page, defaultSubPage, context) 
     page.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mCycleActive).setTypeToggle().setSubPage(defaultSubPage)
     page.makeValueBinding(context.btnsL1U[7].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mAutomationRead).setTypeToggle().setSubPage(defaultSubPage)
     page.makeValueBinding(context.btnsL1U[8].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mAutomationWrite).setTypeToggle().setSubPage(defaultSubPage)
-
     page.makeValueBinding(context.btnsL1L[5].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mEditorOpen).setTypeToggle().setSubPage(defaultSubPage)
     page.makeValueBinding(context.btnsL1L[6].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().setSubPage(defaultSubPage)
     page.makeCommandBinding(context.btnsL1L[7].d.mSurfaceValue, 'Edit', 'Unmute All').setSubPage(defaultSubPage)
     page.makeCommandBinding(context.btnsL1L[8].d.mSurfaceValue, 'Edit', 'Deactivate All Solo').setSubPage(defaultSubPage)
-
+    page.makeActionBinding(context.defaultVariable, defaultSubPage.mAction.mActivate)
 }
 
 /**
@@ -380,6 +337,42 @@ function makePageMixer(deviceDriver, page, context) {
     page.makeActionBinding(context.defaultVariable, defaultSubPage.mAction.mActivate)
     page.makeActionBinding(context.zoomVariable, zoomSubPage.mAction.mActivate)
     page.makeActionBinding(context.markerVariable, markerSubPage.mAction.mActivate)
+
+    //zoomButton -> subpage.zoomSubPage
+    var dummyZoomBtn = deviceDriver.mSurface.makeButton(context.btnsL1U[0].x, context.btnsL1U[0].y, context.btnsL1U[0].w, context.btnsL1U[0].h)
+    page.makeCommandBinding(dummyZoomBtn.mSurfaceValue, 'Tool', 'Zoom Tool').setSubPage(defaultSubPage) //dummy bind
+    context.btnsL1U[0].d.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value) {
+        if (value === 0) {
+            isZoom = !isZoom
+            if (isZoom) {
+                context.zoomVariable.setProcessValue(activeDevice, 1)
+                context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[0].note, 127])
+                context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[1].note, 0])
+            } else {
+                context.zoomVariable.setProcessValue(activeDevice, 0)
+                context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[0].note, 0])
+                context.defaultVariable.setProcessValue(activeDevice, 1)
+            }
+        }
+    }
+
+    //markerButton -> subpage.markerSubPage
+    var dummyMarkerBtn = deviceDriver.mSurface.makeButton(context.btnsL1U[1].x, context.btnsL1U[1].y, context.btnsL1U[1].w, context.btnsL1U[1].h)
+    page.makeCommandBinding(dummyMarkerBtn.mSurfaceValue, 'AddTrack', 'Marker').setSubPage(defaultSubPage) //dummy bind
+    context.btnsL1U[1].d.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value) {
+        if (value === 0) {
+            isMarker = !isMarker
+            if (isMarker) {
+                context.markerVariable.setProcessValue(activeDevice, 1)
+                context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[0].note, 0])
+                context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[1].note, 127])
+            } else {
+                context.markerVariable.setProcessValue(activeDevice, 0)
+                context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[1].note, 0])
+                context.defaultVariable.setProcessValue(activeDevice, 1)
+            }
+        }
+    }
 
     var hostMixerBankZone = page.mHostAccess.mMixConsole.makeMixerBankZone('AudioInstrBanks')
         .includeAudioChannels()
