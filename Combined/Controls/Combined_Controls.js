@@ -723,7 +723,7 @@ function makePageCueSends(deviceDriver, page, context) {
  * @param {MR_FactoryMappingPage} page 
  * @param {MR_SubPage} subPage
  * @param {MR_HostValueUndefined} customVar
- * @parm {MR_HostObject} stripEffect
+ * @parm {MR_HostObject} stripEffectType
  * @param {object} context
  * @param {number} idx
  * @returns
@@ -734,8 +734,8 @@ function makeStripEffectBinding(page, subPage, customVar, stripEffectType, conte
     page.makeValueBinding(context.btnsRow1[idx].d.mSurfaceValue, stripEffectType.mOn).setTypeToggle().setSubPage(subPage)
     page.makeValueBinding(context.btnsRow2[idx].d.mSurfaceValue, stripEffectType.mBypass).setTypeToggle().setSubPage(subPage)
 
-    var b = page.makeValueBinding(context.btnsRow3[idx].d.mSurfaceValue, customVar).setSubPage(subPage)
-    page.makeValueBinding(context.btnsRow3[idx].d.mSurfaceValue, customVar).mOnValueChange = function (activeDevice, activeMapping, arg2) {
+    var map1 = page.makeValueBinding(context.btnsRow3[idx].d.mSurfaceValue, customVar).setSubPage(subPage)
+    map1.mOnValueChange = function (activeDevice, activeMapping, arg2) {
         if (arg2 === 0) {
             var baseID = dam.getBaseObjectID(activeMapping);
             var numChilds = dam.getNumberOfChildObjects(activeMapping, baseID)
@@ -746,6 +746,128 @@ function makeStripEffectBinding(page, subPage, customVar, stripEffectType, conte
                 val = 0
             }
             dam.setParameterProcessValue(activeMapping, baseID, tag, val);
+        }
+    }
+}
+
+/**
+ * @param {MR_FactoryMappingPage} page 
+ * @param {MR_SubPage} subPage
+ * @param {MR_HostValueUndefined} customVar
+ * @parm {MR_HostObject} stripEffect
+ * @param {object} context
+ * @param {MR_ActiveDevice} activeDevice
+ * @param {MR_ActiveMapping} activeMapping
+ * @param {object} buttons
+ * @param {object} knobs
+ * @param {object} ignoreParams
+ * @returns
+ */
+function bindEffectKnobsButtons(page, subPage, customVar, stripEffectType, context, activeDevice, activeMapping, buttons, knobs, ignoreParams) {
+    buttons.length = 0
+    knobs.length = 0
+    var pZone = stripEffectType.mParameterBankZone
+    var dam2 = page.mHostAccess.makeDirectAccess(pZone)
+    var baseID = dam2.getBaseObjectID(activeMapping);
+    var numParams = dam2.getNumberOfParameters(activeMapping, baseID)
+    var b = 0
+    var k = 0
+
+    for (var i = 0; i < numParams; i++) {
+        var pTag = dam2.getParameterTagByIndex(activeMapping, baseID, i)
+        var pName = dam2.getParameterTitle(activeMapping, baseID, pTag, 20)
+        var skip = false
+        for (var j = 0; j < ignoreParams.length; j++) {
+            if (pName.indexOf(ignoreParams[j]) != -1) {
+                skip = true
+                break
+            }
+        }
+
+        if (skip) {
+            continue
+        }
+
+        console.log('pName: ' + pName)
+        var pDisplayValue = dam2.getParameterDisplayValue(activeMapping, baseID, pTag)
+        var pValue = dam2.getParameterProcessValue(activeMapping, baseID, pTag)
+        if (pDisplayValue == 'On' || pDisplayValue == 'Off') {
+            buttons.push(pValue)
+            if (b < context.numStrips1) {
+                page.makeValueBinding(context.btnsRow1[b].d.mSurfaceValue, customVar).setTypeToggle().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
+                    dam2.setParameterProcessValue(activeMapping, baseID, this.pTag, arg2)
+                    buttons[this.b] = arg2
+                }.bind({ pTag, b })
+            } else if (b < (2 * context.numStrips1)) {
+                var pos = b - context.numStrips1
+                page.makeValueBinding(context.btnsRow2[pos].d.mSurfaceValue, customVar).setTypeToggle().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
+                    dam2.setParameterProcessValue(activeMapping, baseID, this.pTag, arg2)
+                    buttons[this.b] = arg2
+                }.bind({  pTag, b })
+            }
+            b++
+        } else {
+            knobs.push(pValue)
+            if (k < context.numStrips1) {
+                page.makeValueBinding(context.knobs1[k].mSurfaceValue, customVar).setValueTakeOverModeScaled().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, /**  {number} arg2 */arg2, arg3) {
+                    dam2.setParameterProcessValue(activeMapping, baseID, this.pTag, arg2)
+                    knobs[this.k] = arg2
+                }.bind({pTag, k })
+            } else if (k < (context.numStrips1 + context.numStrips2)) {
+                page.makeValueBinding(context.knobs2[k - context.numStrips1].mSurfaceValue, customVar).setValueTakeOverModeScaled().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
+                    dam2.setParameterProcessValue(activeMapping, baseID, this.pTag, arg2)
+                    knobs[this.k] = arg2
+                }.bind({pTag, k })
+            }
+            k++
+        }
+    }
+
+    for (var i = b; i < (context.numStrips1 * 2); i++) {
+        if (i < context.numStrips1) {
+            page.makeValueBinding(context.btnsRow1[i].d.mSurfaceValue, customVar).setSubPage(subPage)
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[i].note, 0])
+        } else {
+            page.makeValueBinding(context.btnsRow2[i - context.numStrips1].d.mSurfaceValue, customVar).setSubPage(subPage)
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow2[i - context.numStrips1].note, 0])
+        }
+    }
+
+    for (var i = 0; i < context.numStrips1; i++) {
+        page.makeValueBinding(context.btnsRow3[i].d.mSurfaceValue, customVar).setSubPage(subPage)
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow3[i].note, 0])
+    }
+
+    for (var i = 0; i < context.numStrips1; i++) {
+        page.makeValueBinding(context.btnsRow3[i].d.mSurfaceValue, customVar).setSubPage(subPage)
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow3[i].note, 0])
+    }
+}
+
+/**
+ * @param {object} context
+ * @param {MR_ActiveDevice} activeDevice
+ * @param {object} buttons
+ * @param {object} knobs
+ * @returns
+ */
+function updateEffectsKnobsButtons(context, activeDevice, buttons, knobs) {
+    for (var i = 0; i < buttons.length; i++) {
+        if (i < context.numStrips1) {
+            console.log("bvalue: " + buttons[i])
+            context.btnsRow1[i].d.mSurfaceValue.setProcessValue(activeDevice, buttons[i])
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[i].note, buttons[i]])
+        } else if (i < 2* context.numStrips1) {
+            context.btnsRow2[i - context.numStrips1].d.mSurfaceValue.setProcessValue(activeDevice, buttons[i])
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow2[i - context.numStrips1].note, buttons[i]])
+        }
+    }
+
+    for (var i = 0; i < knobs.length; i++) {
+        if (i < context.numStrips1) {
+            context.knobs1[i].mSurfaceValue.setProcessValue(activeDevice, knobs[i])
+        } else if (i < context.numStrips1 + context.numStrips2) {
+            context.knobs2[i - context.numStrips1].mSurfaceValue.setProcessValue(activeDevice, knobs[i])
         }
     }
 }
@@ -763,50 +885,48 @@ function makePageChannelStrip(deviceDriver, page, context) {
     var gateSubPage = subPageArea.makeSubPage('gate')
     var compressorSubPage = subPageArea.makeSubPage('compressor')
     var toolsSubPage = subPageArea.makeSubPage('tools')
-    var saturatorubPage = subPageArea.makeSubPage('saturator')
+    var saturatorSubPage = subPageArea.makeSubPage('saturator')
     var limiterSubPage = subPageArea.makeSubPage('limiter')
 
     page.makeActionBinding(context.btnsRow4[0].d.mSurfaceValue, gateSubPage.mAction.mActivate).setSubPage(defaultSubPage)
     page.makeActionBinding(context.btnsRow4[1].d.mSurfaceValue, compressorSubPage.mAction.mActivate).setSubPage(defaultSubPage)
     page.makeActionBinding(context.btnsRow4[2].d.mSurfaceValue, toolsSubPage.mAction.mActivate).setSubPage(defaultSubPage)
-    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, saturatorubPage.mAction.mActivate).setSubPage(defaultSubPage)
+    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, saturatorSubPage.mAction.mActivate).setSubPage(defaultSubPage)
     page.makeActionBinding(context.btnsRow4[4].d.mSurfaceValue, limiterSubPage.mAction.mActivate).setSubPage(defaultSubPage)
 
     page.makeActionBinding(context.btnsRow4[0].d.mSurfaceValue, defaultSubPage.mAction.mActivate).setSubPage(gateSubPage)
     page.makeActionBinding(context.btnsRow4[1].d.mSurfaceValue, compressorSubPage.mAction.mActivate).setSubPage(gateSubPage)
     page.makeActionBinding(context.btnsRow4[2].d.mSurfaceValue, toolsSubPage.mAction.mActivate).setSubPage(gateSubPage)
-    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, saturatorubPage.mAction.mActivate).setSubPage(gateSubPage)
+    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, saturatorSubPage.mAction.mActivate).setSubPage(gateSubPage)
     page.makeActionBinding(context.btnsRow4[4].d.mSurfaceValue, limiterSubPage.mAction.mActivate).setSubPage(gateSubPage)
 
     page.makeActionBinding(context.btnsRow4[0].d.mSurfaceValue, gateSubPage.mAction.mActivate).setSubPage(compressorSubPage)
     page.makeActionBinding(context.btnsRow4[1].d.mSurfaceValue, defaultSubPage.mAction.mActivate).setSubPage(compressorSubPage)
     page.makeActionBinding(context.btnsRow4[2].d.mSurfaceValue, toolsSubPage.mAction.mActivate).setSubPage(compressorSubPage)
-    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, saturatorubPage.mAction.mActivate).setSubPage(compressorSubPage)
+    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, saturatorSubPage.mAction.mActivate).setSubPage(compressorSubPage)
     page.makeActionBinding(context.btnsRow4[4].d.mSurfaceValue, limiterSubPage.mAction.mActivate).setSubPage(compressorSubPage)
 
     page.makeActionBinding(context.btnsRow4[0].d.mSurfaceValue, gateSubPage.mAction.mActivate).setSubPage(toolsSubPage)
     page.makeActionBinding(context.btnsRow4[1].d.mSurfaceValue, compressorSubPage.mAction.mActivate).setSubPage(toolsSubPage)
     page.makeActionBinding(context.btnsRow4[2].d.mSurfaceValue, defaultSubPage.mAction.mActivate).setSubPage(toolsSubPage)
-    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, saturatorubPage.mAction.mActivate).setSubPage(toolsSubPage)
+    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, saturatorSubPage.mAction.mActivate).setSubPage(toolsSubPage)
     page.makeActionBinding(context.btnsRow4[4].d.mSurfaceValue, limiterSubPage.mAction.mActivate).setSubPage(toolsSubPage)
 
-    page.makeActionBinding(context.btnsRow4[0].d.mSurfaceValue, gateSubPage.mAction.mActivate).setSubPage(saturatorubPage)
-    page.makeActionBinding(context.btnsRow4[1].d.mSurfaceValue, compressorSubPage.mAction.mActivate).setSubPage(saturatorubPage)
-    page.makeActionBinding(context.btnsRow4[2].d.mSurfaceValue, toolsSubPage.mAction.mActivate).setSubPage(saturatorubPage)
-    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, defaultSubPage.mAction.mActivate).setSubPage(saturatorubPage)
-    page.makeActionBinding(context.btnsRow4[4].d.mSurfaceValue, limiterSubPage.mAction.mActivate).setSubPage(saturatorubPage)
+    page.makeActionBinding(context.btnsRow4[0].d.mSurfaceValue, gateSubPage.mAction.mActivate).setSubPage(saturatorSubPage)
+    page.makeActionBinding(context.btnsRow4[1].d.mSurfaceValue, compressorSubPage.mAction.mActivate).setSubPage(saturatorSubPage)
+    page.makeActionBinding(context.btnsRow4[2].d.mSurfaceValue, toolsSubPage.mAction.mActivate).setSubPage(saturatorSubPage)
+    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, defaultSubPage.mAction.mActivate).setSubPage(saturatorSubPage)
+    page.makeActionBinding(context.btnsRow4[4].d.mSurfaceValue, limiterSubPage.mAction.mActivate).setSubPage(saturatorSubPage)
 
     page.makeActionBinding(context.btnsRow4[0].d.mSurfaceValue, gateSubPage.mAction.mActivate).setSubPage(limiterSubPage)
     page.makeActionBinding(context.btnsRow4[1].d.mSurfaceValue, compressorSubPage.mAction.mActivate).setSubPage(limiterSubPage)
     page.makeActionBinding(context.btnsRow4[2].d.mSurfaceValue, toolsSubPage.mAction.mActivate).setSubPage(limiterSubPage)
-    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, saturatorubPage.mAction.mActivate).setSubPage(limiterSubPage)
+    page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, saturatorSubPage.mAction.mActivate).setSubPage(limiterSubPage)
     page.makeActionBinding(context.btnsRow4[4].d.mSurfaceValue, defaultSubPage.mAction.mActivate).setSubPage(limiterSubPage)
 
-
     createTransportAndContols(deviceDriver, page, defaultSubPage, context)
-    var customVar = page.mCustom.makeHostValueVariable("customVar");
 
-    page.mCustom.makeHostValueVariable("customVar");
+    var customVar = page.mCustom.makeHostValueVariable("customVar");
     var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
     var stripEffects = selectedTrackChannel.mInsertAndStripEffects.mStripEffects
     var types = ['mGate', 'mCompressor', 'mTools', 'mSaturator', 'mLimiter'];
@@ -815,126 +935,52 @@ function makePageChannelStrip(deviceDriver, page, context) {
         makeStripEffectBinding(page, defaultSubPage, customVar, stripEffects[type], context, i)
     }
 
+    var gateButtons = []
+    var gateKnobs = []
+    var gateIgnoreParams = ['InVu', 'OutVu', 'Bypass', 'Live']
     stripEffects.mGate.mOnChangePluginIdentity = function (activeDevice, activeMapping, arg2, arg3, arg4, arg5) {
-        var pZone = stripEffects.mGate.mParameterBankZone
-        var dam2 = page.mHostAccess.makeDirectAccess(pZone)
-        var baseID2 = dam2.getBaseObjectID(activeMapping);
-        var numParams = dam2.getNumberOfParameters(activeMapping, baseID2)
-        var b = 0
-        var k = 0
-
-        var customVars = []
-        var allowedBind = ['Threshold', 'Range', 'Attack', 'Release', 'Auto Release', 'SCOn', 'SCMonitor', 'FilterFreq', 'Q-Factor']
-        for (var i = 0; i < numParams; i++) {
-            var pTag = dam2.getParameterTagByIndex(activeMapping, baseID2, i)
-            var pName = dam2.getParameterTitle(activeMapping, baseID2, pTag, 20)
-            if (allowedBind.indexOf(pName) == -1) {
-                continue
-            }
-
-            customVars[i] = page.mCustom.makeHostValueVariable("gate" + i)
-            var pValue = dam2.getParameterDisplayValue(activeMapping, baseID2, pTag)
-            if (pValue == 'On' || pValue == 'Off') {
-                if (b < context.numStrips1) {
-                    page.makeValueBinding(context.btnsRow1[b].d.mSurfaceValue, customVars[i]).setTypeToggle().setSubPage(gateSubPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
-                        dam2.setParameterProcessValue(activeMapping, baseID2, this.pTag, arg2)
-                    }.bind({ pTag })
-                } else if (b < (2 * context.numStrips1)) {
-                    page.makeValueBinding(context.btnsRow2[b - context.numStrips1].d.mSurfaceValue, customVars[i]).setTypeToggle().setSubPage(gateSubPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
-                        dam2.setParameterProcessValue(activeMapping, baseID2, this.getParameterTagByIndex, arg2)
-                    }.bind({ pTag})
-                }
-                b++
-            } else {
-                if (k < context.numStrips1) {
-                    page.makeValueBinding(context.knobs1[k].mSurfaceValue, customVars[i]).setValueTakeOverModeScaled().setSubPage(gateSubPage).mOnValueChange = function (activeDevice, activeMapping, /**  {number} arg2 */arg2, arg3) {
-                        dam2.setParameterProcessValue(activeMapping, baseID2, this.pTag, arg2)
-                    }.bind({ pTag })
-                } else if (k < (context.numStrips1 + context.numStrips2)) {
-                    page.makeValueBinding(context.knobs2[k - context.numStrips1].mSurfaceValue, customVars[i]).setSubPage(gateSubPage).mOnValueChange = function (activeDevice, ac, arg2, arg3) {
-                        dam2.setParameterProcessValue(activeMapping, baseID2, this.pTag, arg2)
-                    }.bind({ pTag })
-                }
-                k++
-            }
-        }
+        bindEffectKnobsButtons(page, gateSubPage, customVar, stripEffects.mGate, context, activeDevice, activeMapping, gateButtons, gateKnobs, gateIgnoreParams)
     }
 
+    var compButtons = []
+    var compKnobs = []
+    var compIgnoreParams = ['InVu', 'OutVu', 'Input Vu', 'Output Vu', 'Bypass', 'Live']
     stripEffects.mCompressor.mOnChangePluginIdentity = function (activeDevice, activeMapping, effectType, arg3, arg4, arg5) {
-        var arr = [effectType, arg3, arg4]
-        console.log(arr.join(", "))
-        var pZone = stripEffects.mCompressor.mParameterBankZone
-        var dam2 = page.mHostAccess.makeDirectAccess(pZone)
-        var baseID2 = dam2.getBaseObjectID(activeMapping);
-        var numParams = dam2.getNumberOfParameters(activeMapping, baseID2)
-        var b = 0
-        var k = 0
-
-        var customVars = []
-        for (var i = 0; i < numParams; i++) {
-            var pTag = dam2.getParameterTagByIndex(activeMapping, baseID2, i)
-            var pName = dam2.getParameterTitle(activeMapping, baseID2, pTag, 20)
-
-            // if (effectType == 'Standard Compressor' &&
-            //     (pName.indexOf('InVu') != -1 ||
-            //         pName.indexOf('OutVu') != -1)) {
-            //     continue
-            // } else if (effectType == 'Tube Compressor' &&
-            //     (pName.indexOf('Input Vu') != -1 ||
-            //         pName.indexOf('Output Vu') != -1)) {
-            //     continue
-            // } else if (effectType == 'VintageCompressor' &&
-            //     (pName.indexOf('Input Vu') != -1 ||
-            //         pName.indexOf('Output Vu') != -1)) {
-            //     continue
-            // }
-
-            if (pName.indexOf('InVu') != -1 ||
-                pName.indexOf('OutVu') != -1 ||
-                pName.indexOf('Input Vu') != -1 ||
-                pName.indexOf('Output Vu') != -1) {
-                continue
-            }
-
-            customVars[i] = page.mCustom.makeHostValueVariable("compressor" + i)
-            var pValue = dam2.getParameterDisplayValue(activeMapping, baseID2, pTag)
-            if (pValue == 'On' || pValue == 'Off') {
-                if (b < context.numStrips1) {
-                    page.makeValueBinding(context.btnsRow1[b].d.mSurfaceValue, customVars[i]).setTypeToggle().setSubPage(compressorSubPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
-                        dam2.setParameterProcessValue(activeMapping, baseID2, this.pTag, arg2)
-                    }.bind({ pTag })
-                } else if (b < (2 * context.numStrips1)) {
-                    page.makeValueBinding(context.btnsRow2[b - context.numStrips1].d.mSurfaceValue, customVars[i]).setTypeToggle().setSubPage(compressorSubPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
-                        dam2.setParameterProcessValue(activeMapping, baseID2, this.getParameterTagByIndex, arg2)
-                    }.bind({ pTag})
-                }
-                b++
-            } else {
-                if (k < context.numStrips1) {
-                    page.makeValueBinding(context.knobs1[k].mSurfaceValue, customVars[i]).setValueTakeOverModeScaled().setSubPage(compressorSubPage).mOnValueChange = function (activeDevice, activeMapping, /**  {number} arg2 */arg2, arg3) {
-                        dam2.setParameterProcessValue(activeMapping, baseID2, this.pTag, arg2)
-                    }.bind({ pTag })
-                } else if (k < (context.numStrips1 + context.numStrips2)) {
-                    page.makeValueBinding(context.knobs2[k - context.numStrips1].mSurfaceValue, customVars[i]).setSubPage(compressorSubPage).mOnValueChange = function (activeDevice, ac, arg2, arg3) {
-                        dam2.setParameterProcessValue(activeMapping, baseID2, this.pTag, arg2)
-                    }.bind({ pTag })
-                }
-                k++
-            }
-        }
+        bindEffectKnobsButtons(page, compressorSubPage, customVar, stripEffects.mCompressor, context, activeDevice, activeMapping, compButtons, compKnobs, compIgnoreParams)
     }
 
-    
+    var toolsButtons = []
+    var toolsKnobs = []
+    var toolsIgnoreParams = ['InVu', 'OutVu','Input Vu', 'Output Vu', 'Bypass', 'Live']
+    stripEffects.mTools.mOnChangePluginIdentity = function (activeDevice, activeMapping, effectType, arg3, arg4, arg5) {
+        bindEffectKnobsButtons(page, toolsSubPage, customVar, stripEffects.mTools, context, activeDevice, activeMapping, toolsButtons, toolsKnobs, toolsIgnoreParams)
+    }
+
+    var saturatorButtons = []
+    var saturatorKnobs = []
+    var saturatorIgnoreParams = ['InVu', 'OutVu','Input Vu', 'Output Vu', 'Bypass', 'Live']
+    stripEffects.mSaturator.mOnChangePluginIdentity = function (activeDevice, activeMapping, effectType, arg3, arg4, arg5) {
+        bindEffectKnobsButtons(page, saturatorSubPage, customVar, stripEffects.mSaturator, context, activeDevice, activeMapping, saturatorButtons, saturatorKnobs, saturatorIgnoreParams)
+    }
+
+    var limiterButtons = []
+    var limiterKnobs = []
+    var limiterIgnoreParams = ['Input Vu', 'Output Vu', 'RMS In', 'Bypass', 'Live']
+    stripEffects.mLimiter.mOnChangePluginIdentity = function (activeDevice, activeMapping, effectType, arg3, arg4, arg5) {
+        bindEffectKnobsButtons(page, limiterSubPage, customVar, stripEffects.mLimiter, context, activeDevice, activeMapping, limiterButtons, limiterKnobs, limiterIgnoreParams)
+    }
+
     page.mOnActivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[0].note, 0])
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[1].note, 0])
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[2].note, 127])
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[3].note, 0])
-        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
-        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
-        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
-        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
-        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
+        for (var i = 0; i < context.numStrips1; i++) {
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[i].note, 0])
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow2[i].note, 0])
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow3[i].note, 0])
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[i].note, 0])
+        }
     }.bind({ context })
 
     page.mOnDeactivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
@@ -942,8 +988,13 @@ function makePageChannelStrip(deviceDriver, page, context) {
     }.bind({ context })
 
     gateSubPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
-        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[0].note, 0])
+        console.log("gate sub page active")
+        updateEffectsKnobsButtons(context, activeDevice, gateButtons, gateKnobs)
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 127])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
     }.bind({ context })
 
     gateSubPage.mOnDeactivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
@@ -951,7 +1002,12 @@ function makePageChannelStrip(deviceDriver, page, context) {
     }.bind({ context })
 
     compressorSubPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        updateEffectsKnobsButtons(context, activeDevice, compButtons, compKnobs)
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 127])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
     }.bind({ context })
 
     compressorSubPage.mOnDeactivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
@@ -959,18 +1015,28 @@ function makePageChannelStrip(deviceDriver, page, context) {
     }.bind({ context })
 
     toolsSubPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        updateEffectsKnobsButtons(context, activeDevice, toolsButtons, toolsKnobs)
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 127])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
     }.bind({ context })
 
     toolsSubPage.mOnDeactivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
     }.bind({ context })
 
-    saturatorubPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+    saturatorSubPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        updateEffectsKnobsButtons(context, activeDevice, saturatorButtons, saturatorKnobs)
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 127])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
     }.bind({ context })
 
-    saturatorubPage.mOnDeactivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+    saturatorSubPage.mOnDeactivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
     }.bind({ context })
 
@@ -979,6 +1045,11 @@ function makePageChannelStrip(deviceDriver, page, context) {
     }.bind({ context })
 
     limiterSubPage.mOnDeactivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+        updateEffectsKnobsButtons(context, activeDevice, limiterButtons, limiterKnobs)
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 127])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
     }.bind({ context })
 }
