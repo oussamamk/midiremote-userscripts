@@ -83,11 +83,8 @@ function makeButton(surface, midiInput, midiOutput, note, x, y, w, h, withLamp) 
     if (withLamp) {
         button.d = surface.makeButton(x, y, w, h - 1)
         button.l = surface.makeLamp(x, y + h - 1, w, 1)
-        button.v = surface.makeCustomValueVariable("note" + note)
-    }
-    else {
+    } else {
         button.d = surface.makeButton(x, y, w, h)
-        button.v = surface.makeCustomValueVariable("note" + note)
     }
 
     button.d.mSurfaceValue.mMidiBinding.setIsConsuming(true).setInputPort(midiInput).bindToNote(0, note)
@@ -750,6 +747,94 @@ function makeStripEffectBinding(page, subPage, customVar, stripEffectType, conte
     }
 }
 
+
+var stripChannelEffectsMapping = {
+    "Noise Gate": function () {
+        return {
+            knobs: ["Threshold", "Range", "Attack", "Release", "FilterFreq", "Q-Factor"],
+            buttons: ['Bypass', "SCMonitor", "SCOn", "Auto Release"],
+            ignore: ['InVu', 'OutVu', 'Live']
+        }
+    },
+    "Standard Compressor": function () {
+        return {
+            knobs: ["Threshold", "Ratio", "Attack", "Release", "MakeUp"],
+            buttons: ['Bypass', "AutoMakeUp", "Auto Release"],
+            ignore: ['InVu', 'OutVu',  , 'Red', 'MakeupMode']
+        }
+    },
+    "Tube Compressor": function () {
+        return {
+            knobs: ["Input Gain", "Output Gain", "Attack Time", "Release Time", "Drive", "Mix"],
+            buttons: ['Bypass', "Attack Mode" , "Auto Release"],
+            ignore: ['Input Vu', 'Output Vu']
+        }
+    },
+    "VintageCompressor": function () {
+        return {
+            knobs: ["Input Gain", "Output Gain", "Attack Time", "Release Time", "Mix", "Ratio"],
+            buttons: ['Bypass', "Attack Mode", "Auto Release"],
+            ignore: ['Input Vu', 'Output Vu', 'Red']
+        }
+    },
+   "DeEsser": function () {
+        return {
+            knobs: ["Threshold", "Reduction", "Release", "LowFreq", "HighFreq"],
+            buttons: ['Bypass', "Solo", "Diff"],
+            ignore: ['Input Vu', 'Output Vu']
+        }
+    },
+    "EnvelopeShaper": function () {
+        return {
+            knobs: ["Attack Gain", "Release Gain", "Attack Length", "Output"],
+            buttons: ['Bypass'],
+            ignore: ['OutVu']
+        }
+    },
+    "Magneto II": function () {
+        return {
+            knobs: ["Saturation", "Freq-Low", "HF-Adjust", "Freq-High", "Output"],
+            buttons: ['Bypass', "HF-On", "Solo"],
+            ignore: ['InVu', 'OutVu']
+        }
+    },
+    "Tape Saturation": function () {
+        return {
+            knobs: ["Drive", "LF", "HF", "Output"],
+            buttons: ['Bypass', "Dual", "Auto Gain"],
+            ignore: ['OutVu']
+        }
+    },
+    "Tube Saturation": function () {
+        return {
+            knobs: ["Drive", "LF", "HF", "Output"],
+            buttons: ['Bypass'],
+            ignore: ['OutVu']
+        }
+    },
+    "Brickwall Limiter": function () {
+        return {
+            knobs: ["Threshold", "Release"],
+            buttons: ['Bypass'],
+            ignore: ['Input Vu', 'Output Vu', 'Red']
+        }
+    },
+    "Maximizer": function () {
+        return {
+            knobs: ["Optimize", "Mix", 'Output', 'Recover', 'Release'],
+            buttons: ['Bypass', "Modern Mode"],
+            ignore: ['Input Vu', 'Output Vu', 'RMS', 'Red']
+        }
+    },
+    "Standard Limiter": function () {
+        return {
+            knobs: ['Input', 'Release', 'Output'],
+            buttons: ['Bypass', "Auto Release"],
+            ignore: ['Input Vu', 'Output Vu', 'Red']
+        }
+    }
+}
+
 /**
  * @param {MR_FactoryMappingPage} page 
  * @param {MR_SubPage} subPage
@@ -760,25 +845,43 @@ function makeStripEffectBinding(page, subPage, customVar, stripEffectType, conte
  * @param {MR_ActiveMapping} activeMapping
  * @param {object} buttons
  * @param {object} knobs
- * @param {object} ignoreParams
+ * @param {string} effectName
  * @returns
  */
-function bindEffectKnobsButtons(page, subPage, customVar, stripEffectType, context, activeDevice, activeMapping, buttons, knobs, ignoreParams) {
+function bindEffectKnobsButtons(page, subPage, customVar, stripEffectType, context, activeDevice, activeMapping, buttons, knobs, effectName) {
+    var mapping = {}
+    if (stripChannelEffectsMapping[effectName])  {
+        mapping = stripChannelEffectsMapping[effectName]()
+    }
+    else {
+        mapping.buttons = []
+        mapping.knobs = []
+        mapping.ignore = []
+    }
+
     buttons.length = 0
     knobs.length = 0
     var pZone = stripEffectType.mParameterBankZone
     var dam2 = page.mHostAccess.makeDirectAccess(pZone)
     var baseID = dam2.getBaseObjectID(activeMapping);
     var numParams = dam2.getNumberOfParameters(activeMapping, baseID)
-    var b = 0
-    var k = 0
+    var b = mapping.buttons.length
+    var k = mapping.knobs.length
+
+    for (var i = 0; i < b; i++) {
+        buttons.push(false);
+    }
+
+    for (var i = 0; i < k; i++) {
+        knobs.push(0);
+    }
 
     for (var i = 0; i < numParams; i++) {
         var pTag = dam2.getParameterTagByIndex(activeMapping, baseID, i)
         var pName = dam2.getParameterTitle(activeMapping, baseID, pTag, 20)
         var skip = false
-        for (var j = 0; j < ignoreParams.length; j++) {
-            if (pName.indexOf(ignoreParams[j]) != -1) {
+        for (var j = 0; j < mapping.ignore.length; j++) {
+            if (pName.indexOf(mapping.ignore[j]) != -1) {
                 skip = true
                 break
             }
@@ -788,38 +891,60 @@ function bindEffectKnobsButtons(page, subPage, customVar, stripEffectType, conte
             continue
         }
 
-        console.log('pName: ' + pName)
         var pDisplayValue = dam2.getParameterDisplayValue(activeMapping, baseID, pTag)
         var pValue = dam2.getParameterProcessValue(activeMapping, baseID, pTag)
-        if (pDisplayValue == 'On' || pDisplayValue == 'Off') {
-            buttons.push(pValue)
-            if (b < context.numStrips1) {
-                page.makeValueBinding(context.btnsRow1[b].d.mSurfaceValue, customVar).setTypeToggle().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
-                    dam2.setParameterProcessValue(activeMapping, baseID, this.pTag, arg2)
-                    buttons[this.b] = arg2
-                }.bind({ pTag, b })
-            } else if (b < (2 * context.numStrips1)) {
-                var pos = b - context.numStrips1
-                page.makeValueBinding(context.btnsRow2[pos].d.mSurfaceValue, customVar).setTypeToggle().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
-                    dam2.setParameterProcessValue(activeMapping, baseID, this.pTag, arg2)
-                    buttons[this.b] = arg2
-                }.bind({  pTag, b })
+        var sPos = 0
+        var isButton = true
+        
+        // some knobs we want to force to on/off ->button
+        var idx = mapping.buttons.indexOf(pName)
+        if (idx < 0) {
+            isButton = false
+        }
+
+        if (pDisplayValue == 'On' || pDisplayValue == 'Off' || isButton) {
+            if (idx >= 0) {
+                buttons[idx] = pValue
+                sPos = idx
+            } else {
+                buttons.push(pValue)
+                sPos = b
+                b++
             }
-            b++
+
+            if (sPos < context.numStrips1) {
+                page.makeValueBinding(context.btnsRow1[sPos].d.mSurfaceValue, customVar).setTypeToggle().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, value, arg3) {
+                    dam2.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
+                    buttons[this.sPos] = value
+                }.bind({ pTag, sPos })
+            } else if (sPos < (2 * context.numStrips1)) {
+                page.makeValueBinding(context.btnsRow2[sPos - context.numStrips1].d.mSurfaceValue, customVar).setTypeToggle().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, value, arg3) {
+                    dam2.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
+                    buttons[this.sPos] = value
+                }.bind({ pTag, sPos })
+            }
         } else {
-            knobs.push(pValue)
-            if (k < context.numStrips1) {
-                page.makeValueBinding(context.knobs1[k].mSurfaceValue, customVar).setValueTakeOverModeScaled().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, /**  {number} arg2 */arg2, arg3) {
-                    dam2.setParameterProcessValue(activeMapping, baseID, this.pTag, arg2)
-                    knobs[this.k] = arg2
-                }.bind({pTag, k })
-            } else if (k < (context.numStrips1 + context.numStrips2)) {
-                page.makeValueBinding(context.knobs2[k - context.numStrips1].mSurfaceValue, customVar).setValueTakeOverModeScaled().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
-                    dam2.setParameterProcessValue(activeMapping, baseID, this.pTag, arg2)
-                    knobs[this.k] = arg2
-                }.bind({pTag, k })
+            idx = mapping.knobs.indexOf(pName)
+            if (idx >= 0) {
+                knobs[idx] = pValue
+                sPos = idx
+            } else {
+                knobs.push(pValue)
+                sPos = k
+                k++
             }
-            k++
+
+            if (sPos < context.numStrips1) {
+                page.makeValueBinding(context.knobs1[sPos].mSurfaceValue, customVar).setValueTakeOverModeScaled().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, value, arg3) {
+                    dam2.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
+                    knobs[this.sPos] = value
+                }.bind({ pTag, sPos })
+            } else if (sPos < (context.numStrips1 + context.numStrips2)) {
+                page.makeValueBinding(context.knobs2[sPos - context.numStrips1].mSurfaceValue, customVar).setValueTakeOverModeScaled().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, value, arg3) {
+                    dam2.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
+                    knobs[this.sPos] = value
+                }.bind({ pTag, sPos })
+            }
         }
     }
 
@@ -854,10 +979,9 @@ function bindEffectKnobsButtons(page, subPage, customVar, stripEffectType, conte
 function updateEffectsKnobsButtons(context, activeDevice, buttons, knobs) {
     for (var i = 0; i < buttons.length; i++) {
         if (i < context.numStrips1) {
-            console.log("bvalue: " + buttons[i])
             context.btnsRow1[i].d.mSurfaceValue.setProcessValue(activeDevice, buttons[i])
             context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[i].note, buttons[i]])
-        } else if (i < 2* context.numStrips1) {
+        } else if (i < 2 * context.numStrips1) {
             context.btnsRow2[i - context.numStrips1].d.mSurfaceValue.setProcessValue(activeDevice, buttons[i])
             context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow2[i - context.numStrips1].note, buttons[i]])
         }
@@ -930,6 +1054,7 @@ function makePageChannelStrip(deviceDriver, page, context) {
     var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
     var stripEffects = selectedTrackChannel.mInsertAndStripEffects.mStripEffects
     var types = ['mGate', 'mCompressor', 'mTools', 'mSaturator', 'mLimiter'];
+    
     for (var i = 0; i < 5; i++) {
         var type = types[i];
         makeStripEffectBinding(page, defaultSubPage, customVar, stripEffects[type], context, i)
@@ -937,37 +1062,32 @@ function makePageChannelStrip(deviceDriver, page, context) {
 
     var gateButtons = []
     var gateKnobs = []
-    var gateIgnoreParams = ['InVu', 'OutVu', 'Bypass', 'Live']
-    stripEffects.mGate.mOnChangePluginIdentity = function (activeDevice, activeMapping, arg2, arg3, arg4, arg5) {
-        bindEffectKnobsButtons(page, gateSubPage, customVar, stripEffects.mGate, context, activeDevice, activeMapping, gateButtons, gateKnobs, gateIgnoreParams)
+    stripEffects.mGate.mOnChangePluginIdentity = function (activeDevice, activeMapping, effectName, company, version, VSTVersion) {
+        bindEffectKnobsButtons(page, gateSubPage, customVar, stripEffects.mGate, context, activeDevice, activeMapping, gateButtons, gateKnobs, effectName)
     }
 
     var compButtons = []
     var compKnobs = []
-    var compIgnoreParams = ['InVu', 'OutVu', 'Input Vu', 'Output Vu', 'Bypass', 'Live']
-    stripEffects.mCompressor.mOnChangePluginIdentity = function (activeDevice, activeMapping, effectType, arg3, arg4, arg5) {
-        bindEffectKnobsButtons(page, compressorSubPage, customVar, stripEffects.mCompressor, context, activeDevice, activeMapping, compButtons, compKnobs, compIgnoreParams)
+    stripEffects.mCompressor.mOnChangePluginIdentity = function (activeDevice, activeMapping, effectName, company, version, VSTVersion) {
+        bindEffectKnobsButtons(page, compressorSubPage, customVar, stripEffects.mCompressor, context, activeDevice, activeMapping, compButtons, compKnobs, effectName)
     }
 
     var toolsButtons = []
     var toolsKnobs = []
-    var toolsIgnoreParams = ['InVu', 'OutVu','Input Vu', 'Output Vu', 'Bypass', 'Live']
-    stripEffects.mTools.mOnChangePluginIdentity = function (activeDevice, activeMapping, effectType, arg3, arg4, arg5) {
-        bindEffectKnobsButtons(page, toolsSubPage, customVar, stripEffects.mTools, context, activeDevice, activeMapping, toolsButtons, toolsKnobs, toolsIgnoreParams)
+    stripEffects.mTools.mOnChangePluginIdentity = function (activeDevice, activeMapping, effectName, company, version, VSTVersion) {
+        bindEffectKnobsButtons(page, toolsSubPage, customVar, stripEffects.mTools, context, activeDevice, activeMapping, toolsButtons, toolsKnobs, effectName)
     }
 
     var saturatorButtons = []
     var saturatorKnobs = []
-    var saturatorIgnoreParams = ['InVu', 'OutVu','Input Vu', 'Output Vu', 'Bypass', 'Live']
-    stripEffects.mSaturator.mOnChangePluginIdentity = function (activeDevice, activeMapping, effectType, arg3, arg4, arg5) {
-        bindEffectKnobsButtons(page, saturatorSubPage, customVar, stripEffects.mSaturator, context, activeDevice, activeMapping, saturatorButtons, saturatorKnobs, saturatorIgnoreParams)
+    stripEffects.mSaturator.mOnChangePluginIdentity = function (activeDevice, activeMapping, effectName, company, version, VSTVersion) {
+        bindEffectKnobsButtons(page, saturatorSubPage, customVar, stripEffects.mSaturator, context, activeDevice, activeMapping, saturatorButtons, saturatorKnobs, effectName)
     }
 
     var limiterButtons = []
     var limiterKnobs = []
-    var limiterIgnoreParams = ['Input Vu', 'Output Vu', 'RMS In', 'Bypass', 'Live']
-    stripEffects.mLimiter.mOnChangePluginIdentity = function (activeDevice, activeMapping, effectType, arg3, arg4, arg5) {
-        bindEffectKnobsButtons(page, limiterSubPage, customVar, stripEffects.mLimiter, context, activeDevice, activeMapping, limiterButtons, limiterKnobs, limiterIgnoreParams)
+    stripEffects.mLimiter.mOnChangePluginIdentity = function (activeDevice, activeMapping, effectName, company, version, VSTVersion) {
+        bindEffectKnobsButtons(page, limiterSubPage, customVar, stripEffects.mLimiter, context, activeDevice, activeMapping, limiterButtons, limiterKnobs, effectName)
     }
 
     page.mOnActivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
@@ -988,7 +1108,6 @@ function makePageChannelStrip(deviceDriver, page, context) {
     }.bind({ context })
 
     gateSubPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
-        console.log("gate sub page active")
         updateEffectsKnobsButtons(context, activeDevice, gateButtons, gateKnobs)
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 127])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
