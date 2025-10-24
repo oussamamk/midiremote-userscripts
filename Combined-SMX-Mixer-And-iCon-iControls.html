@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Combined Mixer Layout</title>
+  <style>
+    :root{
+      --bg:#ffffff;          /* panel background */
+      --ink:#111111;         /* outlines / text */
+      --muted:#e9ecef;       /* panel inset */
+      --btn:#f8f9fa;         /* button fill */
+      --radius:16px;         /* outer corner radius */
+      --gap:16px;            /* grid gap */
+      --channelWidth: 1fr;   /* each channel column */
+      --panelPad: 18px;      /* panel padding */
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, Noto Sans, "Apple Color Emoji", "Segoe UI Emoji";
+      background: #fafafa;
+      color: var(--ink);
+      display:grid;
+      place-items:center;
+      padding:24px;
+    }
+
+    .mixer{
+      background: var(--bg);
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      padding: var(--panelPad);
+      padding-right: 72px;  /* add space on right side for last column buttons */
+      width:min(1800px, 96vw);
+      box-shadow: 0 8px 24px rgba(0,0,0,.07);
+    }
+
+    .top{
+      display:grid;
+      grid-template-columns: repeat(10, var(--channelWidth));
+      gap: var(--gap);
+      align-items:start;
+    }
+
+    .channel{
+      display:grid;
+      grid-template-rows: auto var(--gap) auto auto auto;
+      align-items:center;
+      justify-items:center;
+      position:relative;
+      padding-bottom: 8px;
+	  margin-left: 25px;
+    }
+
+    /* Knob */
+    .knob{
+      width:72px; height:72px; border:2px solid var(--ink); border-radius: 50%;
+      background: var(--bg);
+      position:relative;
+    }
+    .knob::after{ /* little indicator notch */
+      content:""; position:absolute; left:50%; top:10%; width:2px; height:16px; background:var(--ink); transform:translateX(-50%);
+    }
+    .knob-label{margin-top:10px; font-size:14px; opacity:.8; margin-bottom:10px; letter-spacing:.02em;}
+
+    /* Fader stack */
+    .fader-area{ width: 66px; height: 260px; border:2px solid var(--ink); border-radius: 12px; padding: 10px; background: var(--muted); display:grid; place-items:center; }
+    .fader-track{ width:8px; height:100%; background:#fff; border:2px solid var(--ink); border-radius: 8px; position:relative;}
+    .fader-thumb{ width:56px; height:28px; border:2px solid var(--ink); border-radius:8px; background:var(--bg); position:absolute; left:50%; transform:translate(-50%, -50%); top: var(--pos, 70%);}
+
+    /* Side button column (M / S / R / Select) */
+    /*.side{ 
+	  position:absolute; 
+	  left:0px; 
+	  top:200px; 
+	  display:grid; 
+	  gap:20px; 
+	}*/
+	.side {
+      position: absolute;
+	  left: -48px;
+	  top: 140px;
+	  display: flex;
+	  flex-direction: column;
+	  gap: 25px;   /* spacing between layers */
+	}
+
+    .layer {
+      display: grid;
+      gap: 10px;    /* spacing between upper & lower buttons */
+    }
+	
+	
+    .side1{ position:absolute; right:-32px; top:100px; display:grid; gap:40px; }
+    .sbtn1{ width:56px; height:32px; border:2px solid var(--ink); border-radius:8px; background:var(--btn); font-weight:600; }
+
+    .sbtn{
+      width:70px; 
+	  height:40px; 
+	  border:2px solid var(--ink);
+	  border-radius:10px; 
+	  background:var(--btn); 
+	  font-weight:600; 
+	 }
+    .sbtn span{ font-size:12px }
+
+    /* Channel footer */
+    .ch-label{ margin-top:10px; font-size:13px; font-weight:600; letter-spacing:.02em; }
+
+    /* Transport row */
+    .transport-wrap{ margin-top: 20px; border-top: 2px dashed var(--ink); padding-top: 16px; margin-right: 200px; }
+    .transport{
+      display:grid;
+      grid-template-columns: repeat(11, 1fr);
+      gap:12px;
+    }
+    .tbtn1{ height:44px; border:2px solid var(--ink); border-radius:10px; background:var(--btn); font-size:14px; font-weight:600; }
+
+    /* LEFT button cluster */
+    .left-buttons{
+      display:grid;
+      gap:12px;
+      align-content:start;
+      padding-top:24px;
+	  padding-right:20px;
+    }
+    .row{display:flex; gap:12px; justify-content:left;}
+    
+    /* Panel right utility buttons (optional) */
+    .right-utilities{ position:absolute; right: var(--panelPad); top: var(--panelPad); display:grid; gap:12px; }
+    .util{ width:72px; height:40px; border:2px solid var(--ink); border-radius:10px; background:var(--btn); font-weight:700; }
+
+    /* Layout helper */
+    .panel-rel{ position:relative }
+
+    @media (max-width:1020px){
+      .side{ right:-56px }
+      .fader-area{ height:220px }
+    }
+
+    @media print{
+      body{ background:#fff; padding:0 }
+      .mixer{ box-shadow:none; width:100%; border-color:#000 }
+    }
+  </style>
+</head>
+<body>
+  <main class="mixer panel-rel" role="group" aria-label="SMX Mixer Diagram">
+    <section class="top" aria-label="Channels">
+      <!-- Repeat 8 channels -->
+      
+      <!-- CHANNEL 1 -->
+      <article class="channel" aria-label="Channel 1">
+        <div class="knob" role="img" aria-label="Knob 1"></div>
+        <div class="knob-label">Rotary</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 70%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side1" aria-label="Channel 1 Buttons">
+          <button class="sbtn1" title="Mute 1"><span>Mute</span></button>
+          <button class="sbtn1" title="Solo 1"><span>Solo</span></button>
+          <button class="sbtn1" title="Record 1"><span>Rec</span></button>
+          <button class="sbtn1" title="Select 1"><span>Select</span></button>
+        </div>
+        <div class="ch-label">Fader</div>
+      </article>
+
+      <!-- CHANNEL 2 -->
+      <article class="channel" aria-label="Channel 2">
+        <div class="knob" role="img" aria-label="Knob 2"></div>
+        <div class="knob-label">Rotary</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 60%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side1" aria-label="Channel 2 Buttons">
+          <button class="sbtn1" title="Mute 2"><span>Mute</span></button>
+          <button class="sbtn1" title="Solo 2"><span>Solo</span></button>
+          <button class="sbtn1" title="Record 2"><span>Rec</span></button>
+          <button class="sbtn1" title="Select 2"><span>Select</span></button>
+        </div>
+        <div class="ch-label">Fader</div>
+      </article>
+
+      <!-- CHANNEL 3 -->
+      <article class="channel" aria-label="Channel 3">
+        <div class="knob" role="img" aria-label="Knob 3"></div>
+        <div class="knob-label">Rotary</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 65%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side1" aria-label="Channel 3 Buttons">
+          <button class="sbtn1" title="Mute 3"><span>Mute</span></button>
+          <button class="sbtn1" title="Solo 3"><span>Solo</span></button>
+          <button class="sbtn1" title="Record 3"><span>Rec</span></button>
+          <button class="sbtn1" title="Select 3"><span>Select</span></button>
+        </div>
+        <div class="ch-label">Fader</div>
+      </article>
+
+      <!-- CHANNEL 4 -->
+      <article class="channel" aria-label="Channel 4">
+        <div class="knob" role="img" aria-label="Knob 4"></div>
+        <div class="knob-label">Rotary</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 55%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side1" aria-label="Channel 4 Buttons">
+          <button class="sbtn1" title="Mute 4"><span>Mute</span></button>
+          <button class="sbtn1" title="Solo 4"><span>Solo</span></button>
+          <button class="sbtn1" title="Record 4"><span>Rec</span></button>
+          <button class="sbtn1" title="Select 4"><span>Select</span></button>
+        </div>
+        <div class="ch-label">Fader</div>
+      </article>
+
+      <!-- CHANNEL 5 -->
+      <article class="channel" aria-label="Channel 5">
+        <div class="knob" role="img" aria-label="Knob 5"></div>
+        <div class="knob-label">Rotary</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 62%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side1" aria-label="Channel 5 Buttons">
+          <button class="sbtn1" title="Mute 5"><span>Mute</span></button>
+          <button class="sbtn1" title="Solo 5"><span>Solo</span></button>
+          <button class="sbtn1" title="Record 5"><span>R<ec/span></button>
+          <button class="sbtn1" title="Select 5"><span>Select</span></button>
+        </div>
+        <div class="ch-label">Fader</div>
+      </article>
+
+      <!-- CHANNEL 6 -->
+      <article class="channel" aria-label="Channel 6">
+        <div class="knob" role="img" aria-label="Knob 6"></div>
+        <div class="knob-label">Rotary</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 50%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side1" aria-label="Channel 6 Buttons">
+          <button class="sbtn1" title="Mute 6"><span>Mute</span></button>
+          <button class="sbtn1" title="Solo 6"><span>Solo</span></button>
+          <button class="sbtn1" title="Record 6"><span>Rec</span></button>
+          <button class="sbtn1" title="Select 6"><span>Select</span></button>
+        </div>
+        <div class="ch-label">Fader</div>
+      </article>
+
+      <!-- CHANNEL 7 -->
+      <article class="channel" aria-label="Channel 7">
+        <div class="knob" role="img" aria-label="Knob 7"></div>
+        <div class="knob-label">Rotary</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 58%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side1" aria-label="Channel 7 Buttons">
+          <button class="sbtn1" title="Mute 7"><span>Mute</span></button>
+          <button class="sbtn1" title="Solo 7"><span>Solo</span></button>
+          <button class="sbtn1" title="Record 7"><span>Rec</span></button>
+          <button class="sbtn1" title="Select 7"><span>Select</span></button>
+        </div>
+        <div class="ch-label">Fader</div>
+      </article>
+
+      <!-- CHANNEL 8 -->
+      <article class="channel" aria-label="Channel 8">
+        <div class="knob" role="img" aria-label="Knob 8"></div>
+        <div class="knob-label">Rotary</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 40%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side1" aria-label="Channel 8 Buttons">
+          <button class="sbtn1" title="Mute 8"><span>Mute</span></button>
+          <button class="sbtn1" title="Solo 8"><span>Solo</span></button>
+          <button class="sbtn1" title="Record 8"><span>Rec</span></button>
+          <button class="sbtn1" title="Select 8"><span>Select</span></button>
+        </div>
+        <div class="ch-label">Fader</div>
+      </article>
+
+    </section>
+
+    <section class="transport-wrap" aria-label="Transport Controls">
+      <div class="transport">
+        <button class="tbtn1" title="Play" aria-label="Play">►</button>
+        <button class="tbtn1" title="Pause" aria-label="Pause">❚❚</button>
+        <button class="tbtn1" title="Record" aria-label="Record">⬤</button>
+        <button class="tbtn1" title="Backward" aria-label="Backward">◄◄</button>
+        <button class="tbtn1" title="Forward" aria-label="Forward">►►</button>
+        <button class="tbtn1" title="Bank &laquo;&laquo;" aria-label="Bank Left">&lt;&lt;</button>
+        <button class="tbtn1" title="Bank &raquo;&raquo;" aria-label="Bank Right">&gt;&gt;</button>
+        <button class="tbtn1" title="Up Arrow" aria-label="Up Arrow">▲</button>
+        <button class="tbtn1" title="Down Arrow" aria-label="Down Arrow">▼</button>
+        <button class="tbtn1" title="Left Arrow" aria-label="Left Arrow">◀</button>
+        <button class="tbtn1" title="Right Arrow" aria-label="Right Arrow">▶</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- iControls Section -->
+  <main class="mixer panel-rel" role="group" aria-label="SMX Mixer Diagram">
+
+	
+    <section class="top" aria-label="Channels">
+	      <!-- Left side buttons (8 total: 3+3+2) -->
+    <aside class="left-buttons" aria-label="iControls Side Buttons">
+      <div class="row">
+        <button class="sbtn">Shift</button>
+        <button class="sbtn">Up</button>
+        <button class="sbtn">Smpte</button>
+      </div>
+      <div class="row">
+        <button class="sbtn">Left</button>
+        <button class="sbtn">Down</button>
+        <button class="sbtn">Right</button>
+      </div>
+      <div class="row">
+        <button class="sbtn">L+</button>
+        <button class="sbtn">L-</button>
+      </div>
+    </aside>
+      <!-- Repeat 9 channels -->
+      
+      <!-- CHANNEL 1 -->
+      <article class="channel" aria-label="Channel 1">
+        <div class="knob" role="img" aria-label="Knob 1"></div>
+        <div class="knob-label">Rotary1</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 70%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side" aria-label="Channel 1 Buttons">
+            <div class="layer">
+                <button class="sbtn" title="BL1U1"><span>Zoom</span></button>
+				<button class="sbtn" title="BL1L1"><span></span></button>
+			</div>
+			<div class="layer">
+				<button class="sbtn" title="BL2U1"><span>Midi</span></button>
+				<button class="sbtn" title="BL2L1"><span>F1</span></button>
+			</div>
+		</div>
+        <div class="ch-label">Fader1</div>
+      </article>
+
+      <!-- CHANNEL 2 -->
+      <article class="channel" aria-label="Channel 2">
+        <div class="knob" role="img" aria-label="Knob 2"></div>
+        <div class="knob-label">Rotary2</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 60%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side" aria-label="Channel 2 Buttons">
+            <div class="layer">
+                <button class="sbtn" title="BL1U2"><span>Marker</span></button>
+				<button class="sbtn" title="BL1L2"><span></span></button>
+			</div>
+			<div class="layer">
+				<button class="sbtn" title="BL2U2"><span>Inputs</span></button>
+				<button class="sbtn" title="BL2L2"><span>F2</span></button>
+			</div>
+        </div>
+        </div>
+        <div class="ch-label">Fader2</div>
+      </article>
+
+      <!-- CHANNEL 3 -->
+      <article class="channel" aria-label="Channel 3">
+        <div class="knob" role="img" aria-label="Knob 3"></div>
+        <div class="knob-label">Rotary3</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 65%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side" aria-label="Channel 3 Buttons">
+            <div class="layer">
+                <button class="sbtn" title="BL1U3"><span>Scrub</span></button>
+				<button class="sbtn" title="BL1L3"><span></span></button>
+			</div>
+			<div class="layer">
+				<button class="sbtn" title="BL2U3"><span>AudioTR</span></button>
+				<button class="sbtn" title="BL2L3"><span>F3</span></button>
+			</div>
+        </div>
+        <div class="ch-label">Fader3</div>
+      </article>
+
+      <!-- CHANNEL 4 -->
+      <article class="channel" aria-label="Channel 4">
+        <div class="knob" role="img" aria-label="Knob 4"></div>
+        <div class="knob-label">Rotary4</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 55%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side" aria-label="Channel 4 Buttons">
+            <div class="layer">
+                <button class="sbtn" title="BL1U4"><span>Nudge</span></button>
+				<button class="sbtn" title="BL1L4"><span></span></button>
+			</div>
+			<div class="layer">
+				<button class="sbtn" title="BL2U4"><span>InstTR</span></button>
+				<button class="sbtn" title="BL2L4"><span>F4</span></button>
+			</div>
+        </div>
+        <div class="ch-label">Fader4</div>
+      </article>
+
+      <!-- CHANNEL 5 -->
+      <article class="channel" aria-label="Channel 5">
+        <div class="knob" role="img" aria-label="Knob 5"></div>
+        <div class="knob-label">Rotary5</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 62%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side" aria-label="Channel 5 Buttons">
+            <div class="layer">
+                <button class="sbtn" title="BL1U5"><span>Monitor</span></button>
+				<button class="sbtn" title="BL1L5"><span>EQ</span></button>
+			</div>
+			<div class="layer">
+				<button class="sbtn" title="BL2U5"><span>Aux</span></button>
+				<button class="sbtn" title="BL2L5"><span>F5</span></button>
+			</div>
+        </div>
+        <div class="ch-label">Fader5</div>
+      </article>
+
+      <!-- CHANNEL 6 -->
+      <article class="channel" aria-label="Channel 6">
+        <div class="knob" role="img" aria-label="Knob 6"></div>
+        <div class="knob-label">Rotary6</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 50%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side" aria-label="Channel 6 Buttons">
+            <div class="layer">
+                <button class="sbtn" title="BL1U6"><span>Click</span></button>
+				<button class="sbtn" title="BL1L6"><span>Plugin</span></button>
+			</div>
+			<div class="layer">
+				<button class="sbtn" title="BL2U6"><span>Busses</span></button>
+				<button class="sbtn" title="BL2L6"><span>F6</span></button>
+			</div>
+        </div>
+        <div class="ch-label">Fader6</div>
+      </article>
+
+      <!-- CHANNEL 7 -->
+      <article class="channel" aria-label="Channel 7">
+        <div class="knob" role="img" aria-label="Knob 7"></div>
+        <div class="knob-label">Rotary7</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 58%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side" aria-label="Channel 7 Buttons">
+            <div class="layer">
+                <button class="sbtn" title="BL1U7"><span>Cycle</span></button>
+				<button class="sbtn" title="BL1L7"><span>Edit</span></button>
+			</div>
+			<div class="layer">
+				<button class="sbtn" title="BL2U7"><span>Outputs</span></button>
+				<button class="sbtn" title="BL2L7"><span>F7</span></button>
+			</div>
+        </div>
+        <div class="ch-label">Fader7</div>
+      </article>
+
+      <!-- CHANNEL 8 -->
+      <article class="channel" aria-label="Channel 8">
+        <div class="knob" role="img" aria-label="Knob 8"></div>
+        <div class="knob-label">Rotary8</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 40%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side" aria-label="Channel 8 Buttons">
+            <div class="layer">
+                <button class="sbtn" title="BL1U8"><span>Read</span></button>
+				<button class="sbtn" title="BL1L8"><span>D-Mute</span></button>
+			</div>
+			<div class="layer">
+				<button class="sbtn" title="BL2U8"><span>User</span></button>
+				<button class="sbtn" title="BL2L8"><span>F8</span></button>
+			</div>
+        </div>
+        <div class="ch-label">Fader8</div>
+      </article>
+
+      <!-- CHANNEL 9 -->
+      <article class="channel" aria-label="Channel 9">
+        <div class="knob" role="img" aria-label="Knob 9"></div>
+        <div class="knob-label">Rotary9</div>
+        <div class="fader-area">
+          <div class="fader-track">
+            <div class="fader-thumb" style="--pos: 40%" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="side" aria-label="Channel 9 Buttons">
+            <div class="layer">
+                <button class="sbtn" title="BL1U9"><span>Write</span></button>
+				<button class="sbtn" title="BL1L9"><span>D-Solo</span></button>
+			</div>
+			<div class="layer">
+				<button class="sbtn" title="BL2U9"><span></span></button>
+				<button class="sbtn" title="BL2L9"><span></span></button>
+			</div>
+        </div>
+        <div class="ch-label">Fader9</div>
+      </article>
+
+    </section>
+
+  </main>
+
+</body>
+</html>
