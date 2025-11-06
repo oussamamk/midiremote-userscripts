@@ -2,12 +2,34 @@ var isSurfaceElementsInitialized = false
 var midiremote_api = require('midiremote_api_v1')
 var deviceDriver = midiremote_api.makeDeviceDriver('Controls', 'Combined', 'Oussi')
 
-var midiInput1 = deviceDriver.mPorts.makeMidiInput('SMC-Mixer')
-var midiOutput1 = deviceDriver.mPorts.makeMidiOutput('SMC-Mixer')
-var midiInput2 = deviceDriver.mPorts.makeMidiInput('iCON iControls V2.05')
-var midiOutput2 = deviceDriver.mPorts.makeMidiOutput('iCON iControls V2.05')
+var detectUnit = deviceDriver.makeDetectionUnit()
+
+var midiI1 = deviceDriver.mPorts.makeMidiInput('SMC-Mixer')
+var midiO1 = deviceDriver.mPorts.makeMidiOutput('SMC-Mixer')
+detectUnit.detectPortPair(midiI1, midiO1)
+    .expectInputNameEquals('SMC-Mixer')
+    .expectOutputNameEquals('SMC-Mixer')
+
+var midiI2 = deviceDriver.mPorts.makeMidiInput('iCON iControls V2.05')
+var midiO2 = deviceDriver.mPorts.makeMidiOutput('iCON iControls V2.05')
+detectUnit.detectPortPair(midiI2, midiO2)
+    .expectInputNameEquals('iCON iControls V2.05')
+    .expectOutputNameEquals('iCON iControls V2.05')
+
+var midiI3 = deviceDriver.mPorts.makeMidiInput('test')
+var midiO3 = deviceDriver.mPorts.makeMidiOutput('test') 
+detectUnit.detectPortPair(midiI3, midiO3)
+    .expectInputNameEquals('test')
+    .expectOutputNameEquals('test')
 
 var context = {}
+context.midiInput1 = midiI1
+context.midiOutput1 = midiO1
+context.midiInput2 = midiI2
+context.midiOutput2 = midiO2
+context.midiInput3 = midiI3
+context.midiOutput3 = midiO3
+
 context.numStrips1 = 8
 context.knobs1 = {}
 context.faders1 = {}
@@ -30,11 +52,6 @@ context.btnsL4U = {}
 context.btnsL4L = {}
 context.controls = {}
 
-context.midiInput1 = midiInput1
-context.midiOutput1 = midiOutput1
-context.midiInput2 = midiInput2
-context.midiOutput2 = midiOutput2
-
 context.defaultVariable = deviceDriver.mSurface.makeCustomValueVariable('default')
 context.markerVariable = deviceDriver.mSurface.makeCustomValueVariable('marker')
 context.zoomVariable = deviceDriver.mSurface.makeCustomValueVariable('zoom')
@@ -51,30 +68,58 @@ deviceDriver.mOnActivate = function (activeDevice) {
     activeDevice.setState('lastTime', Date.now().toString())
 }
 
-var detectUnit = deviceDriver.makeDetectionUnit()
-detectUnit.detectPortPair(midiInput1, midiOutput1)
-    .expectInputNameEquals('SMC-Mixer')
-    .expectOutputNameEquals('SMC-Mixer')
-
-detectUnit.detectPortPair(midiInput2, midiOutput2)
-    .expectInputNameEquals('iCON iControls V2.05')
-    .expectOutputNameEquals('iCON iControls V2.05')
 
 /**
  * @param {MR_DeviceSurface} surface
- * @param {MR_DeviceMidiInput} midiInput
- * @param {MR_DeviceMidiOutput} midiOutput
+ * @param {object} context
+ * @param {number} note
+ * @param {number} x
+ * @param {number} y
+ * @param {number} w
+ * @param {number} h
+ * @param {number} idx
+ */
+function makeButton1(surface, context, note, x, y, w, h, idx) {
+    var button = {}
+    button.note = note
+    button.d = surface.makeButton(x, y, w, h)
+    button.d.mSurfaceValue.mMidiBinding
+        .setIsConsuming(true)
+        .setInputPort(context.midiInput1)
+        .bindToNote(0, note)
+    button.x = x
+    button.y = y
+    button.w = w
+    button.h = h
+    button.t = 
+    button.idx = idx
+
+    button.d.mSurfaceValue.mOnProcessValueChange = function (activeDevice) {
+        var value = button.d.mSurfaceValue.getProcessValue(activeDevice)
+        context.midiOutput1.sendMidi(activeDevice, [0x90, this.note, value])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, this.note, value])
+    }.bind({ context, note })
+
+    return button
+}
+
+/**
+ * @param {MR_DeviceSurface} surface
+ * @param {object} context
  * @param {number} note
  * @param {number} x
  * @param {number} y
  * @param {number} w
  * @param {number} h
  */
-function makeButton(surface, midiInput, midiOutput, note, x, y, w, h) {
+function makeButton2(surface, context, note, x, y, w, h) {
     var button = {}
     button.note = note
     button.d = surface.makeButton(x, y, w, h)
-    button.d.mSurfaceValue.mMidiBinding.setIsConsuming(true).setInputPort(midiInput).bindToNote(0, note)
+    button.d.mSurfaceValue.mMidiBinding
+        .setIsConsuming(true)
+        .setInputPort(context.midiInput2)
+        .bindToNote(0, note)
     button.x = x
     button.y = y
     button.w = w
@@ -83,71 +128,87 @@ function makeButton(surface, midiInput, midiOutput, note, x, y, w, h) {
 
     button.d.mSurfaceValue.mOnProcessValueChange = function (activeDevice) {
         var value = button.d.mSurfaceValue.getProcessValue(activeDevice)
-        this.midiOutput.sendMidi(activeDevice, [0x90, this.note, value])
-    }.bind({ midiOutput, note })
+        context.midiOutput2.sendMidi(activeDevice, [0x90, this.note, value])
+        // context.midiOutput3.sendMidi(activeDevice, [0x90, this.note, value])
+    }.bind({ context, note })
 
     return button
 }
 
 /**
  * @param {MR_DeviceDriver} deviceDriver 
- * @param {MR_DeviceMidiInput} midiInput 
- * @param {MR_DeviceMidiOutput} midiOutput 
+ * @param {object} context 
  * @param {number} i 
  * @param {number} cc 
  * @param {number} x 
  * @param {number} y 
  * @param {number} w
  * @param {number} h 
+ * @param {number} idx
 */
-function makeKnob1(deviceDriver, midiInput, midiOutput, i, cc, x, y, w, h) {
+function makeKnob1(deviceDriver, context, i, cc, x, y, w, h, idx) {
     var knob = {} 
     knob.d = deviceDriver.mSurface.makeKnob(x, y, w, h)
     knob.d.mSurfaceValue.mMidiBinding
-        .setInputPort(midiInput)
-        .setOutputPort(midiOutput)
+        .setInputPort(context.midiInput1)
+        .setOutputPort(context.midiOutput1)
         .bindToControlChange(0, cc)
         .setTypeRelativeSignedBit()
+
+    knob.idx = idx
+    knob.t = ''
+    
+    knob.d.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value) {
+        var result = Math.round(value * 127)
+        context.midiOutput3.sendMidi(activeDevice, [0xb0, this.cc, result])
+    }.bind({ context, cc})
 
     return knob
 }
 
 /**
  * @param {MR_DeviceDriver} deviceDriver
- * @param {MR_DeviceMidiInput} midiInput
+ * @param {object} context
  * @param {Number} i    
  * @param {number} x          
  * @param {Number} y          
  * @param {Number} w           
  * @param {Number} h           
+ * @param {Number} idx           
  */
-function makeFader1(deviceDriver, midiInput, midiOutput, i, x, y, w, h) {
-    var fader = deviceDriver.mSurface.makeFader(x, y, w, h).setTypeVertical()
-    fader.mSurfaceValue.mMidiBinding
-        .setInputPort(midiInput)
-        .setOutputPort(midiOutput)
+function makeFader1(deviceDriver, context, i, x, y, w, h, idx) {
+    var fader = {}
+    fader.d = deviceDriver.mSurface.makeFader(x, y, w, h).setTypeVertical()
+    fader.d.mSurfaceValue.mMidiBinding
+        .setInputPort(context.midiInput1)
+        .setOutputPort(context.midiOutput1)
         .bindToPitchBend(i)
+    fader.idx = idx
+    fader.t = ''
+    
+    fader.d.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value) {
+        var result = Math.round(value * 127)
+        context.midiOutput3.sendMidi(activeDevice, [0xE0 + this.i, 0, result])
+    }.bind({ context, i})
 
     return fader
 }
 
 /**
  * @param {MR_DeviceDriver} deviceDriver 
- * @param {MR_DeviceMidiInput} midiInput 
- * @param {MR_DeviceMidiOutput} midiOutput 
- * @param {number} i 
+ * @param {object} context 
  * @param {number} cc 
  * @param {number} x 
  * @param {number} y 
  * @param {number} w
  * @param {number} h 
 */
-function makeKnob2(deviceDriver, midiInput, midiOutput, i, cc, x, y, w, h) {
+function makeKnob2(deviceDriver, context, cc, x, y, w, h) {
     var knob = {}
     knob.d = deviceDriver.mSurface.makeKnob(x, y, w, h)
     knob.d.mSurfaceValue.mMidiBinding
-        .setInputPort(midiInput)
-        .setOutputPort(midiOutput)
+        .setInputPort(context.midiInput2)
+        .setOutputPort(context.midiOutput2)
         .bindToControlChange(0, cc)
         .setTypeAbsolute()
 
@@ -156,7 +217,7 @@ function makeKnob2(deviceDriver, midiInput, midiOutput, i, cc, x, y, w, h) {
 
 /**
  * @param {MR_DeviceDriver} deviceDriver
- * @param {MR_DeviceMidiInput} midiInput
+ * @param {object} context
  * @param {Number} i    
  * @param {number} cc 
  * @param {number} x          
@@ -164,16 +225,45 @@ function makeKnob2(deviceDriver, midiInput, midiOutput, i, cc, x, y, w, h) {
  * @param {Number} w           
  * @param {Number} h           
  */
-function makeFader2(deviceDriver, midiInput, midiOutput, i, cc, x, y, w, h) {
+function makeFader2(deviceDriver, context, i, cc, x, y, w, h) {
     var fader = deviceDriver.mSurface.makeFader(x, y, w, h).setTypeVertical()
     fader.mSurfaceValue.mMidiBinding
-        .setInputPort(midiInput)
-        .setOutputPort(midiOutput)
+        .setInputPort(context.midiInput2)
+        .setOutputPort(context.midiOutput2)
         .bindToControlChange(0, cc)
         .setTypeAbsolute()
 
     return fader
 }
+
+
+/**
+ * @param {MR_FactoryMappingPage} page 
+ * @param {object} surfaceObject
+ * @param {MR_HostValue} hostValue
+ * @param {string} text
+ * @returns {MR_ValueBinding}
+ */
+function makeValueBinding(page, surfaceObject, hostValue, text) {
+    var binding = page.makeValueBinding(surfaceObject.d.mSurfaceValue, hostValue) 
+    surfaceObject.t = text
+    return binding
+}
+	
+	// makeCommandBinding (surfaceValue: MR_SurfaceValue, commandCategory: string, commandName: string): MR_CommandBinding
+	// {
+	// 	return new MR_CommandBinding
+	// }
+	
+	// /**
+	//  * @param {MR_SurfaceValue} surfaceValue
+	//  * @param {MR_HostAction} hostAction
+	//  * @returns {MR_ActionBinding}
+	//  */
+	// makeActionBinding (surfaceValue: MR_SurfaceValue, hostAction: MR_HostAction): MR_ActionBinding
+	// {
+	// 	return new MR_ActionBinding
+	// }
 
 /**
  * @param {MR_DeviceDriver} deviceDriver
@@ -181,8 +271,6 @@ function makeFader2(deviceDriver, midiInput, midiOutput, i, cc, x, y, w, h) {
  * @param {number} i
  */
 function makeOneStrip1(deviceDriver, context, i) {
-    var midiInput = context.midiInput1
-    var midiOutput = context.midiOutput1
     var wButton = 4
     var hButton = 3
     var wKnob = 5
@@ -194,12 +282,12 @@ function makeOneStrip1(deviceDriver, context, i) {
     var x = i * wStrip
     var y = 0
 
-    context.knobs1[i] = makeKnob1(deviceDriver, midiInput, midiOutput, i, 16 + i, x,  y + 2 , wKnob ,  hKnob)
-    context.faders1[i] = makeFader1(deviceDriver, midiInput, midiOutput, i, x + 1 ,  y + 8, wFader, hFader)
-    context.btnsRow1[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 16 + i, x + 4, y + 9, wButton, hButton, true)
-    context.btnsRow2[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 8 + i,  x + 4 , y + 9 + (hButton + 1.5), wButton, hButton, true)
-    context.btnsRow3[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 0 + i, x + 4, y + 9 + 2*(hButton + 1.5), wButton, hButton, true)
-    context.btnsRow4[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 24 + i, x + 4, y + 9 + 3*(hButton + 1.5), wButton, hButton, true)
+    context.knobs1[i] = makeKnob1(deviceDriver, context, i, 16 + i, x,  y + 2 , wKnob ,  hKnob, i + 0)
+    context.faders1[i] = makeFader1(deviceDriver, context, i, x + 1 ,  y + 8, wFader, hFader, i + context.numStrips1)
+    context.btnsRow1[i] = makeButton1(deviceDriver.mSurface, context, 16 + i, x + 4, y + 9, wButton, hButton, i + context.numStrips1 *2)
+    context.btnsRow2[i] = makeButton1(deviceDriver.mSurface, context, 8 + i,  x + 4 , y + 9 + (hButton + 1.5), wButton, hButton, i + context.numStrips1 *3)
+    context.btnsRow3[i] = makeButton1(deviceDriver.mSurface, context, 0 + i, x + 4, y + 9 + 2*(hButton + 1.5), wButton, hButton, i + context.numStrips1 *4)
+    context.btnsRow4[i] = makeButton1(deviceDriver.mSurface, context, 24 + i, x + 4, y + 9 + 3*(hButton + 1.5), wButton, hButton, i + context.numStrips1 *5)
 }
 
 /**
@@ -207,8 +295,6 @@ function makeOneStrip1(deviceDriver, context, i) {
  * @param {object} context
  */
 function createSurfaceElements1(deviceDriver, context) {
-    var midiInput = context.midiInput1
-    var midiOutput = context.midiOutput1
     for (var i = 0; i < context.numStrips1; i++) {
         makeOneStrip1(deviceDriver, context, i)
     }
@@ -218,17 +304,17 @@ function createSurfaceElements1(deviceDriver, context) {
     var x = 3
     var y = 29
     var spacer = wButton + 2.1
-    context.btnStart = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 0x5E, x, y, wButton, hButton, false)
-    context.btnStop = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 0x5D, x + spacer, y, wButton, hButton, false)
-    context.btnRecord = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 0x5F, x + 2 * spacer, y, wButton, hButton, false)
-    context.btnRewind = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 0x5B, x + 3 * spacer, y, wButton, hButton, false)
-    context.btnForward = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 0x5C, x + 4 * spacer, y, wButton, hButton, false)
-    context.btnBankPrev = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 0x2E, x + 5 * spacer, y, wButton, hButton, false)
-    context.btnBankNext = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 0x2F, x + 6 * spacer, y, wButton, hButton, false)
-    context.btnUp = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 0x60, x + 7 * spacer, y, wButton, hButton, false)
-    context.btnDown = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 0x61, x + 8 * spacer, y, wButton, hButton, false)
-    context.btnLeft = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 0x62, x + 9 * spacer, y, wButton, hButton, false)
-    context.btnRight = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 0x63, x + 10 * spacer, y, wButton, hButton, false)
+    context.btnStart = makeButton1(deviceDriver.mSurface, context, 0x5E, x, y, wButton, hButton, false)
+    context.btnStop = makeButton1(deviceDriver.mSurface, context, 0x5D, x + spacer, y, wButton, hButton, false)
+    context.btnRecord = makeButton1(deviceDriver.mSurface, context, 0x5F, x + 2 * spacer, y, wButton, hButton, false)
+    context.btnRewind = makeButton1(deviceDriver.mSurface, context, 0x5B, x + 3 * spacer, y, wButton, hButton, false)
+    context.btnForward = makeButton1(deviceDriver.mSurface, context, 0x5C, x + 4 * spacer, y, wButton, hButton, false)
+    context.btnBankPrev = makeButton1(deviceDriver.mSurface, context, 0x2E, x + 5 * spacer, y, wButton, hButton, false)
+    context.btnBankNext = makeButton1(deviceDriver.mSurface, context, 0x2F, x + 6 * spacer, y, wButton, hButton, false)
+    context.btnUp = makeButton1(deviceDriver.mSurface, context, 0x60, x + 7 * spacer, y, wButton, hButton, false)
+    context.btnDown = makeButton1(deviceDriver.mSurface, context, 0x61, x + 8 * spacer, y, wButton, hButton, false)
+    context.btnLeft = makeButton1(deviceDriver.mSurface, context, 0x62, x + 9 * spacer, y, wButton, hButton, false)
+    context.btnRight = makeButton1(deviceDriver.mSurface, context, 0x63, x + 10 * spacer, y, wButton, hButton, false)
 }
 
 /**
@@ -237,8 +323,6 @@ function createSurfaceElements1(deviceDriver, context) {
  * @param {number} i
  */
 function makeOneStrip2(deviceDriver, context, i) {
-    var midiInput = context.midiInput2
-    var midiOutput = context.midiOutput2
     var wButton = 4
     var hButton = 3
     var wKnob = 5
@@ -250,10 +334,10 @@ function makeOneStrip2(deviceDriver, context, i) {
     var x = 90 + i * wStrip
     var y = 0
 
-    context.knobs2[i] = makeKnob2(deviceDriver, midiInput, midiOutput, i, 10 + i, x, y + 2, wKnob, hKnob)
-    context.faders2[i] = makeFader2(deviceDriver, midiInput, midiOutput, i, 20 + i, x, y + 8, wFader, hFader)
-    context.btnsL1U[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, i, x - 4, + 9 + 2*(hButton + 1.5), wButton, hButton, true)
-    context.btnsL1L[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, i + 9, x - 4, + 9 + 3*(hButton + 1.5), wButton, hButton, true)
+    context.knobs2[i] = makeKnob2(deviceDriver, context, 10 + i, x, y + 2, wKnob, hKnob)
+    context.faders2[i] = makeFader2(deviceDriver, context, i, 20 + i, x, y + 8, wFader, hFader)
+    context.btnsL1U[i] = makeButton2(deviceDriver.mSurface, context, i, x - 4, + 9 + 2*(hButton + 1.5), wButton, hButton, true)
+    context.btnsL1L[i] = makeButton2(deviceDriver.mSurface, context, i + 9, x - 4, + 9 + 3*(hButton + 1.5), wButton, hButton, true)
 }
 
 /**
@@ -261,8 +345,6 @@ function makeOneStrip2(deviceDriver, context, i) {
  * @param {object} context
  */
 function createSurfaceElements2(deviceDriver, context) {
-    var midiInput = context.midiInput2
-    var midiOutput = context.midiOutput2
     context.btnContols = {}
 
     var x = 76
@@ -275,7 +357,7 @@ function createSurfaceElements2(deviceDriver, context) {
             y += 4
             x = 76
         }
-        context.btnContols[i] = makeButton(deviceDriver.mSurface, midiInput, midiOutput, 90 + i, x + (i % 3) * 4, y, w, h, true)
+        context.btnContols[i] = makeButton2(deviceDriver.mSurface, context, 90 + i, x + (i % 3) * 4, y, w, h, true)
     }
 
     y = 0
@@ -394,19 +476,19 @@ function makePageMixer(deviceDriver, page, context) {
     for (var i = 0; i < context.numStrips1; i++) {
         var hostMixerBankChannel = hostMixerBankZone.makeMixerBankChannel()
 
-        var knobSurfaceValue = context.knobs1[i].d.mSurfaceValue
-        var faderSurfaceValue = context.faders1[i].mSurfaceValue
-        var mute_buttonSurfaceValue = context.btnsRow1[i].d.mSurfaceValue
-        var solo_buttonSurfaceValue = context.btnsRow2[i].d.mSurfaceValue
-        var rec_buttonSurfaceValue = context.btnsRow3[i].d.mSurfaceValue
-        var sel_buttonSurfaceValue = context.btnsRow4[i].d.mSurfaceValue
+        var knobSurfaceValue = context.knobs1[i]
+        var faderSurfaceValue = context.faders1[i]
+        var mute_buttonSurfaceValue = context.btnsRow1[i]
+        var solo_buttonSurfaceValue = context.btnsRow2[i]
+        var rec_buttonSurfaceValue = context.btnsRow3[i]
+        var sel_buttonSurfaceValue = context.btnsRow4[i]
 
-        page.makeValueBinding(knobSurfaceValue, hostMixerBankChannel.mValue.mPan).setSubPage(defaultSubPage)
-        page.makeValueBinding(faderSurfaceValue, hostMixerBankChannel.mValue.mVolume).setSubPage(defaultSubPage)
-        page.makeValueBinding(mute_buttonSurfaceValue, hostMixerBankChannel.mValue.mMute).setTypeToggle().setSubPage(defaultSubPage)
-        page.makeValueBinding(solo_buttonSurfaceValue, hostMixerBankChannel.mValue.mSolo).setTypeToggle().setSubPage(defaultSubPage)
-        page.makeValueBinding(rec_buttonSurfaceValue, hostMixerBankChannel.mValue.mRecordEnable).setTypeToggle().setSubPage(defaultSubPage)
-        page.makeValueBinding(sel_buttonSurfaceValue, hostMixerBankChannel.mValue.mSelected).setTypeToggle().setSubPage(defaultSubPage)
+        makeValueBinding(page, knobSurfaceValue, hostMixerBankChannel.mValue.mPan, 'Pan').setSubPage(defaultSubPage)
+        makeValueBinding(page, faderSurfaceValue, hostMixerBankChannel.mValue.mVolume, 'Volume').setSubPage(defaultSubPage)
+        makeValueBinding(page, mute_buttonSurfaceValue, hostMixerBankChannel.mValue.mMute, 'Mute').setTypeToggle().setSubPage(defaultSubPage)
+        makeValueBinding(page, solo_buttonSurfaceValue, hostMixerBankChannel.mValue.mSolo, 'Solo').setTypeToggle().setSubPage(defaultSubPage)
+        makeValueBinding(page, rec_buttonSurfaceValue, hostMixerBankChannel.mValue.mRecordEnable, 'Rec').setTypeToggle().setSubPage(defaultSubPage)
+        makeValueBinding(page, sel_buttonSurfaceValue, hostMixerBankChannel.mValue.mSelected, 'Select').setTypeToggle().setSubPage(defaultSubPage)
     }
 
     page.mOnActivate = function (activeDevice) {
@@ -416,6 +498,42 @@ function makePageMixer(deviceDriver, page, context) {
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[3].note, 0])
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[0].note, 0])
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[1].note, 0])
+
+        var data = [0xf0, 0x00, 0x00]
+        for (var i = 0; i < context.numStrips1; i++) {
+            data.push(context.knobs1[i].idx, context.knobs1[i].t.length)
+            for (var j = 0; j < context.knobs1[i].t.length; j++) {
+                data.push(context.knobs1[i].t.charCodeAt(j))
+            }
+            data.push(0)
+            data.push(context.faders1[i].idx, context.faders1[i].t.length)
+            for (var j = 0; j < context.faders1[i].t.length; j++) {
+                data.push(context.faders1[i].t.charCodeAt(j))
+            }
+            data.push(0)
+            data.push(context.btnsRow1[i].idx, context.btnsRow1[i].t.length)
+            for (var j = 0; j < context.btnsRow1[i].t.length; j++) {
+                data.push(context.btnsRow1[i].t.charCodeAt(j))
+            }
+            data.push(0)
+            data.push(context.btnsRow2[i].idx, context.btnsRow2[i].t.length)
+            for (var j = 0; j < context.btnsRow2[i].t.length; j++) {
+                data.push(context.btnsRow2[i].t.charCodeAt(j))
+            }
+            data.push(0)
+            data.push(context.btnsRow3[i].idx, context.btnsRow3[i].t.length)
+            for (var j = 0; j < context.btnsRow3[i].t.length; j++) {
+                data.push(context.btnsRow3[i].t.charCodeAt(j))
+            }
+            data.push(0)
+            data.push(context.btnsRow4[i].idx, context.btnsRow4[i].t.length)
+            for (var j = 0; j < context.btnsRow4[i].t.length; j++) {
+                data.push(context.btnsRow4[i].t.charCodeAt(j))
+            }
+            data.push(0)
+        }
+        data.push(0xf7)
+        context.midiOutput3.sendMidi(activeDevice, data)
     }.bind({ context })
 
     zoomSubPage.mOnActivate = function(activeDevice) {
@@ -626,7 +744,7 @@ function makeSubPageEQBand(page, defaultSubPage, band, idx, context) {
         }
     }
 
-    page.makeValueBinding(context.faders1[idx].mSurfaceValue, band.mGain).setSubPage(defaultSubPage)
+    page.makeValueBinding(context.faders1[idx].d.mSurfaceValue, band.mGain).setSubPage(defaultSubPage)
     page.makeValueBinding(context.knobs1[(idx - 1) * 2].d.mSurfaceValue, band.mFreq).setSubPage(defaultSubPage)
     page.makeValueBinding(context.knobs1[(idx - 1) * 2 + 1].d.mSurfaceValue, band.mQ).setSubPage(defaultSubPage)
 
@@ -670,6 +788,44 @@ function makePageEQ(deviceDriver, page, context) {
 
     preFilterSubPage.mOnActivate = function (activeDevice) {
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[0].note, 127])
+
+        context.btnsRow1[0].t = 'Bypass'
+        
+        var data = [0xf0, 0x00, 0x00]
+        for (var i = 0; i < context.numStrips1; i++) {
+            data.push(context.knobs1[i].idx, context.knobs1[i].t.length)
+            for (var j = 0; j < context.knobs1[i].t.length; j++) {
+                data.push(context.knobs1[i].t.charCodeAt(j))
+            }
+            data.push(0)
+            data.push(context.faders1[i].idx, context.faders1[i].t.length)
+            for (var j = 0; j < context.faders1[i].t.length; j++) {
+                data.push(context.faders1[i].t.charCodeAt(j))
+            }
+            data.push(0)
+            data.push(context.btnsRow1[i].idx, context.btnsRow1[i].t.length)
+            for (var j = 0; j < context.btnsRow1[i].t.length; j++) {
+                data.push(context.btnsRow1[i].t.charCodeAt(j))
+            }
+            data.push(0)
+            data.push(context.btnsRow2[i].idx, context.btnsRow2[i].t.length)
+            for (var j = 0; j < context.btnsRow2[i].t.length; j++) {
+                data.push(context.btnsRow2[i].t.charCodeAt(j))
+            }
+            data.push(0)
+            data.push(context.btnsRow3[i].idx, context.btnsRow3[i].t.length)
+            for (var j = 0; j < context.btnsRow3[i].t.length; j++) {
+                data.push(context.btnsRow3[i].t.charCodeAt(j))
+            }
+            data.push(0)
+            data.push(context.btnsRow4[i].idx, context.btnsRow4[i].t.length)
+            for (var j = 0; j < context.btnsRow4[i].t.length; j++) {
+                data.push(context.btnsRow4[i].t.charCodeAt(j))
+            }
+            data.push(0)
+        }
+        data.push(0xf7)
+        context.midiOutput3.sendMidi(activeDevice, data)
     }.bind({ context })
 
     preFilterSubPage.mOnDeactivate = function (activeDevice) {
@@ -1270,7 +1426,7 @@ function makePageInsertEffects(deviceDriver, page, context) {
     var defaultSubPage = subPageArea.makeSubPage('default')
 
     createTransportAndContols(deviceDriver, page, defaultSubPage, context)
-    var customVar2 = page.mCustom.makeHostValueVariable('customVar2');
+    var customVar = page.mCustom.makeHostValueVariable('customVar');
     var insertViewer = page.mHostAccess.mTrackSelection.mMixerChannel.mInsertAndStripEffects.makeInsertEffectViewer('insertsViewer')
     insertViewer.followPluginWindowInFocus()
 
@@ -1297,7 +1453,7 @@ function makePageInsertEffects(deviceDriver, page, context) {
         // var arr = ["name:", name, "vendor:", vendor, "version:", version, "format:", format]
         // console.log(arr.join(' '))
         var mapping = getEffectsMappping(name)
-        bindEffectKnobsButtons(page, defaultSubPage, customVar2, insertViewer, context, activeDevice, activeMapping, buttons, knobs, mapping)
+        bindEffectKnobsButtons(page, defaultSubPage, customVar, insertViewer, context, activeDevice, activeMapping, buttons, knobs, mapping)
     }
 
     page.mOnActivate = function (activeDevice, activeMapping) {
@@ -1318,18 +1474,79 @@ function makePageInsertEffects(deviceDriver, page, context) {
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[3].note, 0])
     }.bind({ context })
 }
-createSurfaceElements(deviceDriver, context)
 
+/**
+ * @param {MR_DeviceDriver} deviceDriver 
+ * @param {MR_FactoryMappingPage} page 
+ * @param {object} context
+ */
+function makePageInstrument(deviceDriver, page, context) {
+    var subPageArea = page.makeSubPageArea('Instrument')
+    var defaultSubPage = subPageArea.makeSubPage('default')
+
+    createTransportAndContols(deviceDriver, page, defaultSubPage, context)
+    var customVar = page.mCustom.makeHostValueVariable('customVar');
+    var insertViewer = page.mHostAccess.mTrackSelection.mMixerChannel.mInsertAndStripEffects.makeInsertEffectViewer('insertsViewer')
+    insertViewer.followPluginWindowInFocus()
+
+    for (var i = 0; i < context.numStrips1; i++) {
+        page.makeCommandBinding(context.knobs1[i].d.mSurfaceValue, '', '')
+        page.makeCommandBinding(context.btnsRow1[i].d.mSurfaceValue, '', '')
+        page.makeCommandBinding(context.btnsRow2[i].d.mSurfaceValue, '', '')
+        page.makeCommandBinding(context.btnsRow3[i].d.mSurfaceValue, '', '')
+    }
+
+    for (var i = 0; i < context.numStrips2; i++) {
+        page.makeCommandBinding(context.knobs2[i].d.mSurfaceValue, '', '')
+    }
+
+    // for (var i= 0; i < 8 ; i++) {
+    //     var insertSlot = page.mHostAccess.mTrackSelection.mMixerChannel.mInstrumentPluginSlot.
+    //     var slot = insertSlot.accessSlotAtIndex(i)
+    //     page.makeValueBinding(context.btnsRow4[i].d.mSurfaceValue, slot.mEdit).setTypeToggle()
+    // }
+
+    var buttons = []
+    var knobs = []
+    insertViewer.mOnChangePluginIdentity = function (activeDevice, activeMapping, name, vendor, version, format) {
+        // var arr = ["name:", name, "vendor:", vendor, "version:", version, "format:", format]
+        // console.log(arr.join(' '))
+        var mapping = getEffectsMappping(name)
+        bindEffectKnobsButtons(page, defaultSubPage, customVar, insertViewer, context, activeDevice, activeMapping, buttons, knobs, mapping)
+    }
+
+    page.mOnActivate = function (activeDevice, activeMapping) {
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[0].note, 0])
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[1].note, 0])
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[2].note, 0])
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[3].note, 127])
+
+        for (var i = 0; i < context.numStrips1; i++) {
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[i].note, 0])
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow2[i].note, 0])
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow3[i].note, 0])
+        }
+
+    }
+
+    page.mOnDeactivate = function (activeDevice) {
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[3].note, 0])
+    }.bind({ context })
+}
+
+createSurfaceElements(deviceDriver, context)
 var mixerPage = deviceDriver.mMapping.makePage('Mixer')
 var eqPage = deviceDriver.mMapping.makePage('EQ')
 var cueSendsPage = deviceDriver.mMapping.makePage('CueSends')
 var channelStripPage = deviceDriver.mMapping.makePage('ChannelStrip')
 var insertEffectsPage = deviceDriver.mMapping.makePage('InsertEffects')
+var instrumentPage = deviceDriver.mMapping.makePage('Instrument')
 makePageMixer(deviceDriver, mixerPage, context)
 makePageEQ(deviceDriver, eqPage, context)
 makePageCueSends(deviceDriver, cueSendsPage, context)
 makePageChannelStrip(deviceDriver, channelStripPage, context)
 makePageInsertEffects(deviceDriver, insertEffectsPage, context)
+makePageInstrument(deviceDriver, instrumentPage, context)
 
 mixerPage.makeActionBinding(context.btnsL1L[0].d.mSurfaceValue, eqPage.mAction.mActivate)
 mixerPage.makeActionBinding(context.btnsL1L[1].d.mSurfaceValue, cueSendsPage.mAction.mActivate)
