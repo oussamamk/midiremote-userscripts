@@ -26,7 +26,6 @@ function makeSubPageTransportAndContols(page, subPageArea, context) {
     page.makeValueBinding(context.btnsL1U[3].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mAutomationWrite).setTypeToggle().setSubPage(subPage)
     page.makeValueBinding(context.btnsL1U[4].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mMonitorEnable).setTypeToggle().setSubPage(subPage)
     page.makeValueBinding(context.btnsL1U[5].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mEditorOpen).setTypeToggle().setSubPage(subPage)
-    page.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().setSubPage(subPage)
     page.makeCommandBinding(context.btnsL1L[0].d.mSurfaceValue, 'Edit', 'Undo').setSubPage(subPage)
     page.makeCommandBinding(context.btnsL1L[1].d.mSurfaceValue, 'Edit', 'Redo').setSubPage(subPage)
     page.makeCommandBinding(context.btnsL1L[2].d.mSurfaceValue, 'Edit', 'Unmute All').setSubPage(subPage)
@@ -50,9 +49,9 @@ function bindEffectKnobsButtons(page, subPage, customVar, stripEffectType, conte
     buttons.length = 0
     knobs.length = 0
     var pZone = stripEffectType.mParameterBankZone
-    var dam2 = page.mHostAccess.makeDirectAccess(pZone)
-    var baseID = dam2.getBaseObjectID(activeMapping);
-    var numParams = dam2.getNumberOfParameters(activeMapping, baseID)
+    var dam = page.mHostAccess.makeDirectAccess(pZone)
+    var baseID = dam.getBaseObjectID(activeMapping);
+    var numParams = dam.getNumberOfParameters(activeMapping, baseID)
     var b = mapping.buttons.length
     var k = mapping.knobs.length
 
@@ -64,11 +63,11 @@ function bindEffectKnobsButtons(page, subPage, customVar, stripEffectType, conte
         knobs.push(0);
     }
 
-    // var arr = ['baseID:', baseID, 'numParams:', numParams]
-    // console.log(arr.join(' '))
+    var arr = ['baseID:', baseID, 'numParams:', numParams]
+    console.log(arr.join(' '))
     for (var i = 0; i < numParams; i++) {
-        var pTag = dam2.getParameterTagByIndex(activeMapping, baseID, i)
-        var pName = dam2.getParameterTitle(activeMapping, baseID, pTag, 20)
+        var pTag = dam.getParameterTagByIndex(activeMapping, baseID, i)
+        var pName = dam.getParameterTitle(activeMapping, baseID, pTag, 20)
         var skip = false
         for (var j = 0; j < mapping.ignore.length; j++) {
             if (pName.indexOf(mapping.ignore[j]) != -1) {
@@ -81,8 +80,8 @@ function bindEffectKnobsButtons(page, subPage, customVar, stripEffectType, conte
             continue
         }
 
-        var pDisplayValue = dam2.getParameterDisplayValue(activeMapping, baseID, pTag)
-        var pValue = dam2.getParameterProcessValue(activeMapping, baseID, pTag)
+        var pDisplayValue = dam.getParameterDisplayValue(activeMapping, baseID, pTag)
+        var pValue = dam.getParameterProcessValue(activeMapping, baseID, pTag)
         // arr = ['pTag:', pTag, 'pName:', pName, 'pDisplayValue:', pDisplayValue, 'pValue', pValue]
         // console.log(arr.join(' '))
         var sPos = 0
@@ -106,14 +105,14 @@ function bindEffectKnobsButtons(page, subPage, customVar, stripEffectType, conte
 
             if (sPos < context.numStrips1) {
                 page.makeValueBinding(context.btnsRow1[sPos].d.mSurfaceValue, customVar).setTypeToggle().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, value, arg3) {
-                    dam2.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
+                    dam.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
                     buttons[this.sPos] = value
                 }.bind({ pTag, sPos })
                 context.btnsRow1[sPos].d.mSurfaceValue.setProcessValue(activeDevice, pValue)
                 context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[sPos].note, pValue])
             } else if (sPos < (2 * context.numStrips1)) {
                 page.makeValueBinding(context.btnsRow2[sPos - context.numStrips1].d.mSurfaceValue, customVar).setTypeToggle().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, value, arg3) {
-                    dam2.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
+                    dam.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
                     buttons[this.sPos] = value
                 }.bind({ pTag, sPos })
                 context.btnsRow2[sPos - context.numStrips1].d.mSurfaceValue.setProcessValue(activeDevice, pValue)
@@ -132,13 +131,13 @@ function bindEffectKnobsButtons(page, subPage, customVar, stripEffectType, conte
 
             if (sPos < context.numStrips1) {
                 page.makeValueBinding(context.knobs1[sPos].d.mSurfaceValue, customVar).setValueTakeOverModePickup().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, value, arg3) {
-                    dam2.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
+                    dam.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
                     knobs[this.sPos] = value
                 }.bind({ pTag, sPos })
                 context.knobs1[sPos].d.mSurfaceValue.setProcessValue(activeDevice, pValue)
             } else if (sPos < (context.numStrips1 + context.numStrips2)) {
                 page.makeValueBinding(context.knobs2[sPos - context.numStrips1].d.mSurfaceValue, customVar).setValueTakeOverModePickup().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, value, arg3) {
-                    dam2.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
+                    dam.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
                     knobs[this.sPos] = value
                 }.bind({ pTag, sPos })
                 context.knobs2[sPos - context.numStrips1].d.mSurfaceValue.setProcessValue(activeDevice, pValue)
