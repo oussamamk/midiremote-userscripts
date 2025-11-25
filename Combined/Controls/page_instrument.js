@@ -93,7 +93,7 @@ function dynamicInstrumentKnobsButtons(page, subPage, activeDevice, activeMappin
         }
 
 
-        if (pDisplayValue == 'On' || pDisplayValue == 'Off' || isButton) {
+        if (isButton) {
             if (idx >= 0) {
                 buttons[idx] = pValue
                 sPos = idx
@@ -349,7 +349,7 @@ function getInstrumentMappping(name) {
         mapping.knobs = []
         mapping.faders = []
         mapping.ignore = []
-        mapping.smapping = false
+        mapping.smapping = true
     }
     return mapping
 }
