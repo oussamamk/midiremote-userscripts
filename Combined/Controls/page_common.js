@@ -167,7 +167,7 @@ function bindEffectKnobsButtons(page, subPage, customVar, stripEffectType, conte
  * @param {object} mapping
  * @param {object} buttons
  * @param {MR_HostValueUndefined} customVar
- * @param {numbaer} sPos
+ * @param {number} sPos
  * @param {*} pValue
  */
 function assignButtons(page, subPage, activeDevice, dam, context, sObjects, baseID, pTag, mapping, buttons, customVar, sPos, pValue) {
@@ -192,7 +192,6 @@ function assignButtons(page, subPage, activeDevice, dam, context, sObjects, base
  * @param {object} sObjects
  * @param {number} baseID 
  * @param {number} pTag 
- * @param {object} mapping
  * @param {object} faders
  * @param {MR_HostValueUndefined} customVar
  * @param {number} sPos
