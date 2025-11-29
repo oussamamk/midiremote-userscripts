@@ -335,7 +335,6 @@ function staticInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping
     var k2 = mapping.knobs2.length
     var f1 = mapping.faders1.length
     var f2 = mapping.faders2.length
-    console.log("b: " + b)
 
     for (var sPos = 0; sPos < b; sPos++) {
         var pTag = mapping.buttons[sPos]
@@ -430,7 +429,6 @@ function bindInstrumentKnobsButtons(page, subPage, customVar, stripEffectType, c
     var dam = page.mHostAccess.makeDirectAccess(pZone)
     var baseID = dam.getBaseObjectID(activeMapping)
     var b = mapping.buttons.length
-    console.log("here")
 
     for (var i = 0; i < (2 * context.numStrips1); i++) {
         buttons[i] = false
@@ -444,7 +442,6 @@ function bindInstrumentKnobsButtons(page, subPage, customVar, stripEffectType, c
         faders[i] = 0
     }
 
-    console.log("here")
     if (mapping.smapping) {
         staticInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping, dam, baseID, mapping, context, buttons, knobs, faders, customVar)
     } else {

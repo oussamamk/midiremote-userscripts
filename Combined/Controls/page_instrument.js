@@ -3,18 +3,18 @@ var makeSubPageTransportAndContols = page_common.makeSubPageTransportAndContols
 var bindInstrumentKnobsButtons = page_common.bindInstrumentKnobsButtons
 
 var instrumentsMapping = {
-    'Kontakt 8': function () {
-        return {
-            knobs1: [],
-            knobs2: [],
-            faders1: [],
-            faders2: [],
-            buttons: [],
-            tbuttons: [],
-            ignore: ['#', 'CC', 'Omni', 'Poly', 'Bank ', 'Foot ', 'Data ', 'Portamento ', 'Channel Volume', 'Balance(', 'Pan(', 'All ', 'Pitchbend', 'Expression(', ' Pedal', 'Sostenuto', 'Legato ', 'Hold ', 'Aftertouch', 'Kontakt'],
-            smapping: false
-        }
-    },
+    // 'Kontakt 8': function () {
+    //     return {
+    //         knobs1: [],
+    //         knobs2: [],
+    //         faders1: [],
+    //         faders2: [],
+    //         buttons: [],
+    //         tbuttons: [],
+    //         ignore: ['#', 'CC', 'Omni', 'Poly', 'Bank ', 'Foot ', 'Data ', 'Portamento ', 'Channel Volume', 'Balance(', 'Pan(', 'All ', 'Pitchbend', 'Expression(', ' Pedal', 'Sostenuto', 'Legato ', 'Hold ', 'Aftertouch', 'Kontakt'],
+    //         smapping: false
+    //     }
+    // },
     'Analog Lab V': function () {
         return {
             knobs1: [],
@@ -38,7 +38,20 @@ var instrumentsMapping = {
             ignore: ['MIDI ', 'MPE_', 'VST_', 'Hardware', 'Channel'],
             smapping: true
         }
+    },
+    'Kontakt8 - Perfect Sounds': function () {
+        return {
+            knobs1: [4222, 4223, 4224, ],
+            knobs2: [],
+            faders1: [4220],
+            faders2: [4211, 4212, 4213, 4214, 4215, 4216, 4217, 4218, 4219],
+            buttons: [4226, 4227 ],
+            tbuttons: [],
+            ignore: ['#', 'CC', 'Omni', 'Poly', 'Bank ', 'Foot ', 'Data ', 'Portamento ', 'Channel Volume', 'Balance(', 'Pan(', 'All ', 'Pitchbend', 'Expression(', ' Pedal', 'Sostenuto', 'Legato ', 'Hold ', 'Aftertouch', 'Kontakt'],
+            smapping: true
+        }
     }
+
 }
 
 /**
@@ -96,8 +109,19 @@ function makePageInstrument(deviceDriver, page, context) {
     instrument.mOnChangePluginIdentity = function (activeDevice, activeMapping, name, vendor, version, format) {
         var arr = ["name:", name, "vendor:", vendor, "version:", version, "format:", format]
         console.log(arr.join(' '))
-        var mapping = getInstrumentMappping(name)
-        bindInstrumentKnobsButtons(page, defaultSubPage, customVar, instrument, context, activeDevice, activeMapping, buttons, knobs, faders, mapping)
+        if (instrumentsMapping[name]) {
+            var mapping = getInstrumentMappping(name)
+            bindInstrumentKnobsButtons(page, defaultSubPage, customVar, instrument, context, activeDevice, activeMapping, buttons, knobs, faders, mapping)
+        }
+    }
+
+
+    page.mHostAccess.mTrackSelection.mMixerChannel.mOnTitleChange = function(activeDevice, activeMapping, title) {
+        console.log("title: " + title)
+        if (instrumentsMapping[title]) {
+            var mapping = getInstrumentMappping(title)
+            bindInstrumentKnobsButtons(page, defaultSubPage, customVar, instrument, context, activeDevice, activeMapping, buttons, knobs, faders, mapping)
+        }
     }
 
     defaultSubPage.mOnActivate = function (activeDevice, activeMapping) {
