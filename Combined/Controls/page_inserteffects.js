@@ -1,27 +1,13 @@
 var page_common = require('./page_common.js')
 var makeSubPageTransportAndContols = page_common.makeSubPageTransportAndContols
-var bindEffectKnobsButtons = page_common.bindEffectKnobsButtons
+var bindInstrumentKnobsButtons = page_common.bindInstrumentKnobsButtons
 
 var effectsMapping = {
     'CSR Hall': function () {
         return {
-            knobs: ['Mix', 'Diffusion', 'Rvb Time', 'Low Time', 'High Freq', 'High Damp'],
-            buttons: ['Bypass'],
-            ignore: ['In', 'Out']
-        }
-    },
-    'Dual Spring': function () {
-        return {
-            knobs: [],
-            buttons: ['Bypass', 'Mono A', 'Stretch A', 'Mono B', 'Stretch B'],
-            ignore: []
-        }
-    },
-    'RC 48': function () {
-        return {
-            knobs: [],
-            buttons: ['Bypass', 'Algorithm', 'Mix Mode', 'Size Mode'],
-            ignore: ['Echo']
+            knobs1: [4203, 4213, 4206, 4207, 4209, 4210],
+            buttons: [4226],
+            smapping: false
         }
     }
 
@@ -36,9 +22,7 @@ function getEffectsMappping(name) {
         mapping = effectsMapping[name]()
     }
     else {
-        mapping.buttons = []
-        mapping.knobs = []
-        mapping.ignore = []
+        mapping.smapping = true
     }
     return mapping
 }
@@ -75,11 +59,15 @@ function makePageInsertEffects(deviceDriver, page, context) {
 
     var buttons = []
     var knobs = []
+    var faders = []
     insertViewer.mOnChangePluginIdentity = function (activeDevice, activeMapping, name, vendor, version, format) {
-        // var arr = ["name:", name, "vendor:", vendor, "version:", version, "format:", format]
-        // console.log(arr.join(' '))
-        var mapping = getEffectsMappping(name)
-        bindEffectKnobsButtons(page, defaultSubPage, customVar, insertViewer, context, activeDevice, activeMapping, buttons, knobs, mapping)
+        if (effectsMapping[name] != null) {
+            var mapping = getEffectsMappping(name)
+            bindInstrumentKnobsButtons(page, defaultSubPage, customVar, insertViewer, context, activeDevice, activeMapping, buttons, knobs, faders, mapping, true)
+        } else {
+            var arr = ["name:", name, "vendor:", vendor, "version:", version, "format:", format]
+            console.log(arr.join(' '))
+        }
     }
 
     defaultSubPage.mOnActivate = function (activeDevice, activeMapping) {
