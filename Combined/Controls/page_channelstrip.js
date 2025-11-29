@@ -1,7 +1,7 @@
 var page_common = require('./page_common.js')
 var makeSubPageTransportAndContols = page_common.makeSubPageTransportAndContols
-var bindEffectKnobsButtons = page_common.bindEffectKnobsButtons
-
+var bindInstrumentKnobsButtons = page_common.bindInstrumentKnobsButtons
+var updateEffectsKnobsButtons = page_common.updateEffectsKnobsButtons
 /**
  * @param {MR_FactoryMappingPage} page 
  * @param {MR_SubPage} subPage
@@ -35,86 +35,99 @@ function makeStripEffectBinding(page, subPage, customVar, stripEffectType, conte
 var stripChannelEffectsMapping = {
     'Noise Gate': function () {
         return {
-            knobs: ['Threshold', 'Range', 'Attack', 'Release', 'FilterFreq', 'Q-Factor'],
-            buttons: ['Bypass', 'SCMonitor', 'SCOn', 'Auto Release'],
-            ignore: ['InVu', 'OutVu', 'Live']
+            knobs1: [4201, 4243, 4202, 4203, 4212, 4213],
+            buttons: [4215, 4210, 4208, 4214],
+            ignore: ['InVu', 'OutVu', 'Live'],
+            smapping: false
         }
     },
     'Standard Compressor': function () {
         return {
-            knobs: ['Threshold', 'Ratio', 'Attack', 'Release', 'MakeUp'],
-            buttons: ['Bypass', 'AutoMakeUp', 'Auto Release'],
-            ignore: ['InVu', 'OutVu',  , 'Red', 'MakeupMode']
+            knobs1: [4201, 4210, 4202, 4203, 4205],
+            buttons: [4216, 4211, 4215],
+            ignore: ['InVu', 'OutVu',  , 'Red', 'MakeupMode'],
+            smapping: false
         }
     },
     'Tube Compressor': function () {
         return {
-            knobs: ['Input Gain', 'Output Gain', 'Attack Time', 'Release Time', 'Drive', 'Mix'],
-            buttons: ['Bypass', 'Attack Mode' , 'Auto Release'],
-            ignore: ['Input Vu', 'Output Vu']
+            knobs1: [4216, 4217, 4202, 4203, 4218, 4219],
+            buttons: [4225, 4215],
+            tbuttons: [],
+            ignore: ['Input Vu', 'Output Vu'],
+            smapping: false
         }
     },
     'VintageCompressor': function () {
         return {
-            knobs: ['Input Gain', 'Output Gain', 'Attack Time', 'Release Time', 'Mix', 'Ratio'],
-            buttons: ['Bypass', 'Attack Mode', 'Auto Release'],
-            ignore: ['Input Vu', 'Output Vu', 'Red']
+            knobs1: [4216, 4217, 4202, 4203, 4250, 4210],
+            buttons: [4219, 4218, 4215],
+            ignore: ['Input Vu', 'Output Vu'],
+            smapping: false
         }
     },
    'DeEsser': function () {
         return {
-            knobs: ['Threshold', 'Reduction', 'Release', 'LowFreq', 'HighFreq'],
-            buttons: ['Bypass', 'Solo', 'Diff'],
-            ignore: ['Input Vu', 'Output Vu']
+            knobs1: [4202, 4201, 4206, 4240, 4241],
+            buttons: [4209, 4207, 4242, 4244],
+            ignore: ['Input Vu', 'Output Vu'],
+            smapping: false
         }
     },
     'EnvelopeShaper': function () {
         return {
-            knobs: ['Attack Gain', 'Release Gain', 'Attack Length', 'Output'],
-            buttons: ['Bypass'],
-            ignore: ['OutVu']
+            knobs1: [4210, 4212, 4211, 4213],
+            buttons: [4218],
+            ignore: ['OutVu'],
+            smapping: false
         }
     },
     'Magneto II': function () {
         return {
-            knobs: ['Saturation', 'Freq-Low', 'HF-Adjust', 'Freq-High', 'Output'],
-            buttons: ['Bypass', 'HF-On', 'Solo'],
-            ignore: ['InVu', 'OutVu']
+            knobs1: [4201, 4209, 4205, 4210, 4202],
+            buttons: [4208, 4212, 4211],
+            ignore: ['InVu', 'OutVu'],
+            smapping: false
         }
     },
     'Tape Saturation': function () {
         return {
-            knobs: ['Drive', 'LF', 'HF', 'Output'],
-            buttons: ['Bypass', 'Dual', 'Auto Gain'],
-            ignore: ['OutVu']
+            knobs1: [4201, 4204, 4205, 4202],
+            buttons: [4208, 4203, 4206],
+            ignore: ['OutVu'],
+            smapping: false
         }
     },
     'Tube Saturation': function () {
         return {
-            knobs: ['Drive', 'LF', 'HF', 'Output'],
-            buttons: ['Bypass'],
-            ignore: ['OutVu']
+            knobs1: [4201, 4203, 4204, 4202],
+            buttons: [4206],
+            ignore: ['OutVu'],
+            smapping: false
         }
     },
     'Brickwall Limiter': function () {
         return {
-            knobs: ['Threshold', 'Release'],
-            buttons: ['Bypass'],
-            ignore: ['Input Vu', 'Output Vu', 'Red']
+            knobs1: [4201, 4203],
+            buttons: [4215, 4211],
+            ignore: ['Input Vu', 'Output Vu', ],
+            smapping: false
         }
     },
     'Maximizer': function () {
         return {
-            knobs: ['Optimize', 'Mix', 'Output', 'Recover', 'Release'],
-            buttons: ['Bypass', 'Modern Mode'],
-            ignore: ['Input Vu', 'Output Vu', 'RMS', 'Red']
+            knobs1: [4211, 4214, 4212, 4218, 4203, 5241, 5242, 5243],
+            buttons: [4215, 4216, 4213],
+            ignore: ['Input Vu', 'Output Vu', 'RMS'],
+            smapping: false
         }
     },
     'Standard Limiter': function () {
         return {
-            knobs: ['Input', 'Release', 'Output'],
-            buttons: ['Bypass', 'Auto Release'],
-            ignore: ['Input Vu', 'Output Vu', 'Red']
+            knobs1: [4210, 4203, 4205],
+            buttons: [4217, 4211],
+            ignore: ['Input Vu', 'Output Vu'],
+            smapping: false
         }
     }
 }
@@ -128,50 +141,17 @@ function getChannelStripPluginMappping(name) {
         mapping = stripChannelEffectsMapping[name]()
     }
     else {
-        mapping.buttons = []
-        mapping.knobs = []
-        mapping.ignore = []
+        // mapping.buttons = []
+        // mapping.tbuttons = []
+        // mapping.knobs1 = []
+        // mapping.knobs2 = []
+        // mapping.faders1 = []
+        // mapping.faders2 = []
+        // mapping.ignore = []
+        mapping.smapping = true
     }
     return mapping
 }
-
-/**
- * @param {object} context
- * @param {MR_ActiveDevice} activeDevice
- * @param {object} buttons
- * @param {object} knobs
- */
-function updateEffectsKnobsButtons(context, activeDevice, buttons, knobs) {
-    for (var i = 0; i < buttons.length; i++) {
-        if (i < context.numStrips1) {
-            context.btnsRow1[i].d.mSurfaceValue.setProcessValue(activeDevice, buttons[i])
-            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[i].note, buttons[i]])
-        } else if (i < 2 * context.numStrips1) {
-            context.btnsRow2[i - context.numStrips1].d.mSurfaceValue.setProcessValue(activeDevice, buttons[i])
-            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow2[i - context.numStrips1].note, buttons[i]])
-        }
-    }
-
-    for (var i = 0; i < knobs.length; i++) {
-        if (i < context.numStrips1) {
-            context.knobs1[i].d.mSurfaceValue.setProcessValue(activeDevice, knobs[i])
-        } else if (i < context.numStrips1 + context.numStrips2) {
-            context.knobs2[i - context.numStrips1].d.mSurfaceValue.setProcessValue(activeDevice, knobs[i])
-        }
-    }
-
-    for (i = buttons.length; i < (context.numStrips1 * 2); i++) {
-        if (i < context.numStrips1) {
-            context.btnsRow1[i].d.mSurfaceValue.setProcessValue(activeDevice, 0)
-            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[i].note, 0])
-        } else if (i < 2 * context.numStrips1) {
-            context.btnsRow2[i - context.numStrips1].d.mSurfaceValue.setProcessValue(activeDevice, 0)
-            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow2[i - context.numStrips1].note, 0])
-        }
-    }
-
-}
-
 
 /**
  * @param {MR_DeviceDriver} deviceDriver 
@@ -243,39 +223,59 @@ function makePageChannelStrip(deviceDriver, page, context) {
         makeStripEffectBinding(page, defaultSubPage, customVar, stripEffects[type], context, i)
     }
 
-    var gateButtons = []
-    var gateKnobs = []
+    var gateButtons = [false, false, false, false, false, false, false, false,
+                   false, false, false, false, false, false, false, false]
+    var gateKnobs = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
+                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
+    var gateFaders = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
+                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
     stripEffects.mGate.mOnChangePluginIdentity = function (activeDevice, activeMapping, name, vendor, version, formatVersion) {
         var mapping = getChannelStripPluginMappping(name)
-        bindEffectKnobsButtons(page, gateSubPage, customVar, stripEffects.mGate, context, activeDevice, activeMapping, gateButtons, gateKnobs, mapping)
+        bindInstrumentKnobsButtons(page, gateSubPage, customVar, stripEffects.mGate, context, activeDevice, activeMapping, gateButtons, gateKnobs, gateFaders, mapping, true)
     }
 
-    var compButtons = []
-    var compKnobs = []
+    var compButtons = [false, false, false, false, false, false, false, false,
+                   false, false, false, false, false, false, false, false]
+    var compKnobs = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
+                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
+    var compFaders = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
+                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
     stripEffects.mCompressor.mOnChangePluginIdentity = function (activeDevice, activeMapping, name, vendor, version, formatVersion) {
         var mapping = getChannelStripPluginMappping(name)
-        bindEffectKnobsButtons(page, compressorSubPage, customVar, stripEffects.mCompressor, context, activeDevice, activeMapping, compButtons, compKnobs, mapping)
+        bindInstrumentKnobsButtons(page, compressorSubPage, customVar, stripEffects.mCompressor, context, activeDevice, activeMapping, compButtons, compKnobs, compFaders, mapping, true)
     }
 
-    var toolsButtons = []
-    var toolsKnobs = []
+    var toolsButtons = [false, false, false, false, false, false, false, false,
+                   false, false, false, false, false, false, false, false]
+    var toolsKnobs = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
+                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
+    var toolsFaders = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
+                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
     stripEffects.mTools.mOnChangePluginIdentity = function (activeDevice, activeMapping, name, vendor, version, formatVersion) {
         var mapping = getChannelStripPluginMappping(name)
-        bindEffectKnobsButtons(page, toolsSubPage, customVar, stripEffects.mTools, context, activeDevice, activeMapping, toolsButtons, toolsKnobs, mapping)
+        bindInstrumentKnobsButtons(page, toolsSubPage, customVar, stripEffects.mTools, context, activeDevice, activeMapping, toolsButtons, toolsKnobs, toolsFaders, mapping, true)
     }
 
-    var saturatorButtons = []
-    var saturatorKnobs = []
+    var saturatorButtons = [false, false, false, false, false, false, false, false,
+                   false, false, false, false, false, false, false, false]
+    var saturatorKnobs = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
+                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
+    var saturatorFaders = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
+                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
     stripEffects.mSaturator.mOnChangePluginIdentity = function (activeDevice, activeMapping, name, vendor, version, formatVersion) {
         var mapping = getChannelStripPluginMappping(name)
-        bindEffectKnobsButtons(page, saturatorSubPage, customVar, stripEffects.mSaturator, context, activeDevice, activeMapping, saturatorButtons, saturatorKnobs, mapping)
+        bindInstrumentKnobsButtons(page, saturatorSubPage, customVar, stripEffects.mSaturator, context, activeDevice, activeMapping, saturatorButtons, saturatorKnobs, saturatorFaders, mapping, true)
     }
 
-    var limiterButtons = []
-    var limiterKnobs = []
+    var limiterButtons = [false, false, false, false, false, false, false, false,
+                   false, false, false, false, false, false, false, false]
+    var limiterKnobs = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
+                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
+    var limiterFaers = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
+                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
     stripEffects.mLimiter.mOnChangePluginIdentity = function (activeDevice, activeMapping, name, vendor, version, formatVersion) {
         var mapping = getChannelStripPluginMappping(name)
-        bindEffectKnobsButtons(page, limiterSubPage, customVar, stripEffects.mLimiter, context, activeDevice, activeMapping, limiterButtons, limiterKnobs, mapping)
+        bindInstrumentKnobsButtons(page, limiterSubPage, customVar, stripEffects.mLimiter, context, activeDevice, activeMapping, limiterButtons, limiterKnobs, limiterFaers, mapping, true)
     }
 
     defaultSubPage.mOnActivate = function (activeDevice) {

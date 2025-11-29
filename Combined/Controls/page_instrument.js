@@ -17,9 +17,7 @@ var instrumentsMapping = {
     // },
     'Analog Lab V': function () {
         return {
-            knobs1: [],
             knobs2: [4203, 4205, 4207, 4209, 4303, 4364, 4425, 4434, 4201],
-            faders1: [],
             faders2: [4213, 4214, 4215, 4216, 4217, 4218, 4219, 4220, 4221],
             buttons: [4699, 4700],
             tbuttons: [4699, 4700],
@@ -30,23 +28,19 @@ var instrumentsMapping = {
     'Augmented GRAND PIANO': function () {
         return {
             knobs1: [4203, 4204, 4205, 4202, 4206, 4207, 4208, 4209],
-            knobs2: [],
             faders1: [4210, 4227, 4244, 4283],
-            faders2: [],
             buttons: [4995, 4996, 4211, 4228, 4245, 4284],
             tbuttons: [4995, 4996],
             ignore: ['MIDI ', 'MPE_', 'VST_', 'Hardware', 'Channel'],
             smapping: true
         }
     },
-    'Kontakt8 - Perfect Sounds': function () {
+    'Kontakt - Perfect Sounds': function () {
         return {
             knobs1: [4222, 4223, 4224, ],
-            knobs2: [],
             faders1: [4220],
             faders2: [4211, 4212, 4213, 4214, 4215, 4216, 4217, 4218, 4219],
             buttons: [4226, 4227 ],
-            tbuttons: [],
             ignore: ['#', 'CC', 'Omni', 'Poly', 'Bank ', 'Foot ', 'Data ', 'Portamento ', 'Channel Volume', 'Balance(', 'Pan(', 'All ', 'Pitchbend', 'Expression(', ' Pedal', 'Sostenuto', 'Legato ', 'Hold ', 'Aftertouch', 'Kontakt'],
             smapping: true
         }
@@ -63,13 +57,6 @@ function getInstrumentMappping(name) {
         mapping = instrumentsMapping[name]()
     }
     else {
-        mapping.buttons = []
-        mapping.tbuttons = []
-        mapping.knobs1 = []
-        mapping.knobs2 = []
-        mapping.faders1 = []
-        mapping.faders2 = []
-        mapping.ignore = []
         mapping.smapping = true
     }
     return mapping
@@ -111,7 +98,7 @@ function makePageInstrument(deviceDriver, page, context) {
         console.log(arr.join(' '))
         if (instrumentsMapping[name]) {
             var mapping = getInstrumentMappping(name)
-            bindInstrumentKnobsButtons(page, defaultSubPage, customVar, instrument, context, activeDevice, activeMapping, buttons, knobs, faders, mapping)
+            bindInstrumentKnobsButtons(page, defaultSubPage, customVar, instrument, context, activeDevice, activeMapping, buttons, knobs, faders, mapping, false)
         }
     }
 
@@ -120,7 +107,7 @@ function makePageInstrument(deviceDriver, page, context) {
         console.log("title: " + title)
         if (instrumentsMapping[title]) {
             var mapping = getInstrumentMappping(title)
-            bindInstrumentKnobsButtons(page, defaultSubPage, customVar, instrument, context, activeDevice, activeMapping, buttons, knobs, faders, mapping)
+            bindInstrumentKnobsButtons(page, defaultSubPage, customVar, instrument, context, activeDevice, activeMapping, buttons, knobs, faders, mapping, false)
         }
     }
 
