@@ -271,7 +271,7 @@ function makeOneStrip2(deviceDriver, context, i) {
  * @param {object} context
  */
 function createSurfaceElements2(deviceDriver, context) {
-    context.btnContols = {}
+    context.btnControls = {}
 
     var x = 76
     var y = 2
@@ -283,7 +283,7 @@ function createSurfaceElements2(deviceDriver, context) {
             y += 4
             x = 76
         }
-        context.btnContols[i] = makeButton2(deviceDriver.mSurface, context, 90 + i, x + (i % 3) * 4, y, w, h, i + context.numStrips2 * 4)
+        context.btnControls[i] = makeButton2(deviceDriver.mSurface, context, 90 + i, x + (i % 3) * 4, y, w, h, i + context.numStrips2 * 4)
     }
 
     y = 0

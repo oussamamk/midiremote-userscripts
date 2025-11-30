@@ -113,56 +113,56 @@ mixerPage.makeActionBinding(context.btnsL1L[5].d.mSurfaceValue, channelStripPage
 mixerPage.makeActionBinding(context.btnsL1L[6].d.mSurfaceValue, cuePage.mAction.mActivate)
 mixerPage.makeActionBinding(context.btnsL1L[7].d.mSurfaceValue, sendsPage.mAction.mActivate)
 mixerPage.makeActionBinding(context.btnsL1L[8].d.mSurfaceValue, insertEffectsPage.mAction.mActivate)
-mixerPage.makeActionBinding(context.btnContols[0].d.mSurfaceValue, commandsPage.mAction.mActivate)
+mixerPage.makeActionBinding(context.btnControls[0].d.mSurfaceValue, commandsPage.mAction.mActivate)
 
 eqPage.makeActionBinding(context.btnsL1L[4].d.mSurfaceValue, mixerPage.mAction.mActivate)
 eqPage.makeActionBinding(context.btnsL1L[5].d.mSurfaceValue, channelStripPage.mAction.mActivate)
 eqPage.makeActionBinding(context.btnsL1L[6].d.mSurfaceValue, cuePage.mAction.mActivate)
 eqPage.makeActionBinding(context.btnsL1L[7].d.mSurfaceValue, sendsPage.mAction.mActivate)
 eqPage.makeActionBinding(context.btnsL1L[8].d.mSurfaceValue, insertEffectsPage.mAction.mActivate)
-eqPage.makeActionBinding(context.btnContols[0].d.mSurfaceValue, commandsPage.mAction.mActivate)
+eqPage.makeActionBinding(context.btnControls[0].d.mSurfaceValue, commandsPage.mAction.mActivate)
 
 channelStripPage.makeActionBinding(context.btnsL1L[4].d.mSurfaceValue, eqPage.mAction.mActivate)
 channelStripPage.makeActionBinding(context.btnsL1L[5].d.mSurfaceValue, mixerPage.mAction.mActivate)
 channelStripPage.makeActionBinding(context.btnsL1L[6].d.mSurfaceValue, cuePage.mAction.mActivate)
 channelStripPage.makeActionBinding(context.btnsL1L[7].d.mSurfaceValue, sendsPage.mAction.mActivate)
 channelStripPage.makeActionBinding(context.btnsL1L[8].d.mSurfaceValue, insertEffectsPage.mAction.mActivate)
-channelStripPage.makeActionBinding(context.btnContols[0].d.mSurfaceValue, commandsPage.mAction.mActivate)
+channelStripPage.makeActionBinding(context.btnControls[0].d.mSurfaceValue, commandsPage.mAction.mActivate)
 
 cuePage.makeActionBinding(context.btnsL1L[4].d.mSurfaceValue, eqPage.mAction.mActivate)
 cuePage.makeActionBinding(context.btnsL1L[5].d.mSurfaceValue, channelStripPage.mAction.mActivate)
 cuePage.makeActionBinding(context.btnsL1L[6].d.mSurfaceValue, mixerPage.mAction.mActivate)
 cuePage.makeActionBinding(context.btnsL1L[7].d.mSurfaceValue, sendsPage.mAction.mActivate)
 cuePage.makeActionBinding(context.btnsL1L[8].d.mSurfaceValue, insertEffectsPage.mAction.mActivate)
-cuePage.makeActionBinding(context.btnContols[0].d.mSurfaceValue, commandsPage.mAction.mActivate)
+cuePage.makeActionBinding(context.btnControls[0].d.mSurfaceValue, commandsPage.mAction.mActivate)
 
 sendsPage.makeActionBinding(context.btnsL1L[4].d.mSurfaceValue, eqPage.mAction.mActivate)
 sendsPage.makeActionBinding(context.btnsL1L[5].d.mSurfaceValue, channelStripPage.mAction.mActivate)
 sendsPage.makeActionBinding(context.btnsL1L[6].d.mSurfaceValue, cuePage.mAction.mActivate)
 sendsPage.makeActionBinding(context.btnsL1L[7].d.mSurfaceValue, mixerPage.mAction.mActivate)
 sendsPage.makeActionBinding(context.btnsL1L[8].d.mSurfaceValue, insertEffectsPage.mAction.mActivate)
-sendsPage.makeActionBinding(context.btnContols[0].d.mSurfaceValue, commandsPage.mAction.mActivate)
+sendsPage.makeActionBinding(context.btnControls[0].d.mSurfaceValue, commandsPage.mAction.mActivate)
 
 insertEffectsPage.makeActionBinding(context.btnsL1L[4].d.mSurfaceValue, eqPage.mAction.mActivate)
 insertEffectsPage.makeActionBinding(context.btnsL1L[5].d.mSurfaceValue, channelStripPage.mAction.mActivate)
 insertEffectsPage.makeActionBinding(context.btnsL1L[6].d.mSurfaceValue, cuePage.mAction.mActivate)
 insertEffectsPage.makeActionBinding(context.btnsL1L[7].d.mSurfaceValue, sendsPage.mAction.mActivate)
 insertEffectsPage.makeActionBinding(context.btnsL1L[8].d.mSurfaceValue, mixerPage.mAction.mActivate)
-insertEffectsPage.makeActionBinding(context.btnContols[0].d.mSurfaceValue, commandsPage.mAction.mActivate)
+insertEffectsPage.makeActionBinding(context.btnControls[0].d.mSurfaceValue, commandsPage.mAction.mActivate)
 
 instrumentPage.makeActionBinding(context.btnsL1L[4].d.mSurfaceValue, eqPage.mAction.mActivate)
 instrumentPage.makeActionBinding(context.btnsL1L[5].d.mSurfaceValue, channelStripPage.mAction.mActivate)
 instrumentPage.makeActionBinding(context.btnsL1L[6].d.mSurfaceValue, cuePage.mAction.mActivate)
 instrumentPage.makeActionBinding(context.btnsL1L[7].d.mSurfaceValue, sendsPage.mAction.mActivate)
 instrumentPage.makeActionBinding(context.btnsL1L[8].d.mSurfaceValue, mixerPage.mAction.mActivate)
-instrumentPage.makeActionBinding(context.btnContols[0].d.mSurfaceValue, commandsPage.mAction.mActivate)
+instrumentPage.makeActionBinding(context.btnControls[0].d.mSurfaceValue, commandsPage.mAction.mActivate)
 
 commandsPage.makeActionBinding(context.btnsL1L[4].d.mSurfaceValue, eqPage.mAction.mActivate)
 commandsPage.makeActionBinding(context.btnsL1L[5].d.mSurfaceValue, channelStripPage.mAction.mActivate)
 commandsPage.makeActionBinding(context.btnsL1L[6].d.mSurfaceValue, cuePage.mAction.mActivate)
 commandsPage.makeActionBinding(context.btnsL1L[7].d.mSurfaceValue, sendsPage.mAction.mActivate)
 commandsPage.makeActionBinding(context.btnsL1L[8].d.mSurfaceValue, insertEffectsPage.mAction.mActivate)
-commandsPage.makeActionBinding(context.btnContols[0].d.mSurfaceValue, mixerPage.mAction.mActivate)
+commandsPage.makeActionBinding(context.btnControls[0].d.mSurfaceValue, mixerPage.mAction.mActivate)
 
 mixerPage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, mixerPage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function(activeDevice, activeMapping, value, diff) {
     if (value == 1) {
@@ -263,9 +263,9 @@ instrumentPage.mOnDeactivate = function (activeDevice) {
 }
 
 commandsPage.mOnActivate = function (activeDevice) {
-    context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnContols[0].note, 127])
+    context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnControls[0].note, 127])
 }
 
 commandsPage.mOnDeactivate = function (activeDevice) {
-    context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnContols[0].note, 0])
+    context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnControls[0].note, 0])
 }

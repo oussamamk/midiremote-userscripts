@@ -9,10 +9,10 @@ var makeSubPageTransportAndContols = page_common.makeSubPageTransportAndContols
  */
 function makeMarkerSubPage(page, subPageArea, context) {
     var subPage = subPageArea.makeSubPage('marker')
-    page.makeCommandBinding(context.btnContols[1].d.mSurfaceValue, 'Marker', 'Insert Marker').setSubPage(subPage)
-    page.makeCommandBinding(context.btnContols[3].d.mSurfaceValue, 'Transport', 'Locate Previous Event').setSubPage(subPage)
-    page.makeCommandBinding(context.btnContols[5].d.mSurfaceValue, 'Transport', 'Locate Next Event').setSubPage(subPage)
-    page.makeCommandBinding(context.btnContols[4].d.mSurfaceValue, 'Transport', '').setSubPage(subPage)
+    page.makeCommandBinding(context.btnControls[1].d.mSurfaceValue, 'Marker', 'Insert Marker').setSubPage(subPage)
+    page.makeCommandBinding(context.btnControls[3].d.mSurfaceValue, 'Transport', 'Locate Previous Event').setSubPage(subPage)
+    page.makeCommandBinding(context.btnControls[5].d.mSurfaceValue, 'Transport', 'Locate Next Event').setSubPage(subPage)
+    page.makeCommandBinding(context.btnControls[4].d.mSurfaceValue, 'Transport', '').setSubPage(subPage)
 
     return subPage
 }
@@ -25,10 +25,10 @@ function makeMarkerSubPage(page, subPageArea, context) {
  */
 function makeZoomSubPage(page, subPageArea, context) {
     var subPage = subPageArea.makeSubPage('zoom')
-    page.makeCommandBinding(context.btnContols[5].d.mSurfaceValue, 'Zoom', 'Zoom In').setSubPage(subPage)
-    page.makeCommandBinding(context.btnContols[3].d.mSurfaceValue, 'Zoom', 'Zoom Out').setSubPage(subPage)
-    page.makeCommandBinding(context.btnContols[4].d.mSurfaceValue, 'Zoom', 'Zoom In Vertically').setSubPage(subPage)
-    page.makeCommandBinding(context.btnContols[1].d.mSurfaceValue, 'Zoom', 'Zoom Out Vertically').setSubPage(subPage)
+    page.makeCommandBinding(context.btnControls[5].d.mSurfaceValue, 'Zoom', 'Zoom In').setSubPage(subPage)
+    page.makeCommandBinding(context.btnControls[3].d.mSurfaceValue, 'Zoom', 'Zoom Out').setSubPage(subPage)
+    page.makeCommandBinding(context.btnControls[4].d.mSurfaceValue, 'Zoom', 'Zoom In Vertically').setSubPage(subPage)
+    page.makeCommandBinding(context.btnControls[1].d.mSurfaceValue, 'Zoom', 'Zoom Out Vertically').setSubPage(subPage)
 
     return subPage
 }
