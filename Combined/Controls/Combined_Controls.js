@@ -23,6 +23,14 @@ var makePageInstrument = page_instrument.makePageInstrument
 var page_commands = require('./page_commands.js')
 var makePageCommands = page_commands.makePageCommands
 
+var helper = require("./helper.js")
+var sendLableApp1 = helper.sendLableApp1
+var sendLableApp2 = helper.sendLableApp2
+
+var page_common = require("./page_common.js")
+var resetLabels1 = page_common.resetLabels1
+var resetLabels2 = page_common.resetLabels2
+
 var midiremote_api = require('midiremote_api_v1')
 
 var deviceDriver = midiremote_api.makeDeviceDriver('Controls', 'Combined', 'Oussi')
@@ -73,7 +81,29 @@ context.btnsL3U = {}
 context.btnsL3L = {}
 context.btnsL4U = {}
 context.btnsL4L = {}
-context.controls = {}
+context.btnControls = {}
+
+function setLabelsTransportAndControls(context) {
+    context.btnsL1U[0].t = 'Metronome'
+    context.btnsL1U[1].t = 'Cycle'
+    context.btnsL1U[2].t = 'Auto-Read'
+    context.btnsL1U[3].t = 'Auto-Write'
+    context.btnsL1U[4].t = 'Monitor'
+    context.btnsL1U[5].t = 'Channel Settings'
+    context.btnsL1U[6].t = 'Instrument'
+    context.btnsL1U[7].t = 'Zoom'
+    context.btnsL1U[8].t = 'Marker'
+
+    context.btnsL1L[0].t = 'Undo'
+    context.btnsL1L[1].t = 'Redo'
+    context.btnsL1L[2].t = 'UnMute All'
+    context.btnsL1L[3].t = 'UnSolo All'
+    context.btnsL1L[4].t = 'EQ'
+    context.btnsL1L[5].t = 'Channel Strip'
+    context.btnsL1L[6].t = 'Cue'
+    context.btnsL1L[7].t = 'Sends'
+    context.btnsL1L[8].t = 'Insert Effects'
+}
 
 deviceDriver.mOnActivate = function (activeDevice) {
     context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[5].note, 0])
@@ -85,28 +115,23 @@ deviceDriver.mOnActivate = function (activeDevice) {
     context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[6].note, 0])
     context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[7].note, 0])
     context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[8].note, 0])
-    activeDevice.setState('lastTime', Date.now().toString())
+    resetLabels1(context)
+    resetLabels2(context)
+    setLabelsTransportAndControls(context)
+    sendLableApp1(activeDevice, context)
+    sendLableApp2(activeDevice, context)
 }
 
 makeSurfaceElements(deviceDriver, context)
 
-var mixerPage = deviceDriver.mMapping.makePage('Mixer')
-var eqPage = deviceDriver.mMapping.makePage('EQ')
-var channelStripPage = deviceDriver.mMapping.makePage('ChannelStrip')
-var cuePage = deviceDriver.mMapping.makePage('Cue')
-var sendsPage = deviceDriver.mMapping.makePage('Sends')
-var insertEffectsPage = deviceDriver.mMapping.makePage('InsertEffects')
-var instrumentPage = deviceDriver.mMapping.makePage('Instrument')
-var commandsPage = deviceDriver.mMapping.makePage('Commands')
-
-makePageMixer(deviceDriver, mixerPage, context)
-makePageEQ(deviceDriver, eqPage, context)
-makePageChannelStrip(deviceDriver, channelStripPage, context)
-makePageCue(deviceDriver, cuePage, context)
-makePageSends(deviceDriver, sendsPage, context)
-makePageInsertEffects(deviceDriver, insertEffectsPage, context)
-makePageInstrument(deviceDriver, instrumentPage, context)
-makePageCommands(deviceDriver, commandsPage, context)
+var mixerPage = makePageMixer(deviceDriver, context)
+var eqPage = makePageEQ(deviceDriver, context)
+var channelStripPage = makePageChannelStrip(deviceDriver, context)
+var cuePage = makePageCue(deviceDriver, context)
+var sendsPage = makePageSends(deviceDriver, context)
+var insertEffectsPage = makePageInsertEffects(deviceDriver, context)
+var instrumentPage = makePageInstrument(deviceDriver, context)
+var commandsPage = makePageCommands(deviceDriver, context)
 
 mixerPage.makeActionBinding(context.btnsL1L[4].d.mSurfaceValue, eqPage.mAction.mActivate)
 mixerPage.makeActionBinding(context.btnsL1L[5].d.mSurfaceValue, channelStripPage.mAction.mActivate)

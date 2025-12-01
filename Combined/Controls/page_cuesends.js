@@ -4,11 +4,11 @@ var makeSubPageTransportAndContols = page_common.makeSubPageTransportAndContols
 /**
  * 
  * @param {MR_DeviceDriver} deviceDriver 
- * @param {MR_FactoryMappingPage} page 
  * @param {object} context
  * @returns
  */
-function makePageCue(deviceDriver, page, context) {
+function makePageCue(deviceDriver, context) {
+    var page = deviceDriver.mMapping.makePage('Sends')
     var subPageArea = page.makeSubPageArea('Cue')
     var defaultSubPage = subPageArea.makeSubPage('default')
 
@@ -23,16 +23,30 @@ function makePageCue(deviceDriver, page, context) {
         page.makeValueBinding(context.knobs1[idx * 2].d.mSurfaceValue, cueSendSlot.mPan).setSubPage(defaultSubPage)
         page.makeValueBinding(context.knobs1[idx * 2 + 1].d.mSurfaceValue, cueSendSlot.mLevel).setSubPage(defaultSubPage)
     }
+
+    defaultSubPage.mOnActivate = function (activeDevice) {
+        context.btnsL1U[7].t=''
+        context.btnsL1U[8].t=''
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[6].note, 127])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[6].note, 127])
+    }.bind({ context })
+
+    defaultSubPage.mOnDeactivate = function (activeDevice) {
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[6].note, 0])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[6].note, 0])
+    }.bind({ context })
+
+    return page
 }
 
 /**
  * 
  * @param {MR_DeviceDriver} deviceDriver 
- * @param {MR_FactoryMappingPage} page 
  * @param {object} context
  * @returns
  */
-function makePageSends(deviceDriver, page, context) {
+function makePageSends(deviceDriver, context) {
+    var page = deviceDriver.mMapping.makePage('Cue')
     var subPageArea = page.makeSubPageArea('Sends')
     var defaultSubPage = subPageArea.makeSubPage('default')
 
@@ -46,6 +60,20 @@ function makePageSends(deviceDriver, page, context) {
         page.makeValueBinding(context.btnsRow2[idx].d.mSurfaceValue, sendSlot.mPrePost).setTypeToggle().setSubPage(defaultSubPage)
         page.makeValueBinding(context.knobs1[idx].d.mSurfaceValue, sendSlot.mLevel).setSubPage(defaultSubPage)
     }
+
+    defaultSubPage.mOnActivate = function (activeDevice) {
+        context.btnsL1U[7].t = ''
+        context.btnsL1U[8].t = ''
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[7].note, 127])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[7].note, 127])
+    }.bind({ context })
+
+    defaultSubPage.mOnDeactivate = function (activeDevice) {
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[7].note, 0])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[7].note, 0])
+    }.bind({ context })
+
+    return page
 }
 
 module.exports = {

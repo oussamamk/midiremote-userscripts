@@ -10,7 +10,6 @@ var effectsMapping = {
             smapping: false
         }
     }
-
 }
 
 /**
@@ -29,10 +28,10 @@ function getEffectsMappping(name) {
 
 /**
  * @param {MR_DeviceDriver} deviceDriver 
- * @param {MR_FactoryMappingPage} page 
  * @param {object} context
  */
-function makePageInsertEffects(deviceDriver, page, context) {
+function makePageInsertEffects(deviceDriver, context) {
+    var page = deviceDriver.mMapping.makePage('InsertEffects')
     var subPageArea = page.makeSubPageArea('InserEffects')
     var defaultSubPage = subPageArea.makeSubPage('default')
 
@@ -75,8 +74,16 @@ function makePageInsertEffects(deviceDriver, page, context) {
             context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[i].note, 0])
             context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow2[i].note, 0])
         }
-
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[8].note, 127])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[8].note, 127])
     }
+
+    defaultSubPage.mOnDeactivate = function (activeDevice) {
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[8].note, 0])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[8].note, 0])
+    }.bind({ context })
+
+    return page
 }
 
 module.exports = {

@@ -1,5 +1,19 @@
 var page_common = require('./page_common.js')
 var makeSubPageTransportAndContols = page_common.makeSubPageTransportAndContols
+var helper = require("./helper.js")
+var sendLableApp1 = helper.sendLableApp1
+var sendLableApp2 = helper.sendLableApp2
+
+function setPageDefaultLabels(context) {
+    for (var i = 0; i < context.numStrips1; i++) {
+        context.knobs1[i].t = 'Pan'
+        context.faders1[i].t = 'Volume'
+        context.btnsRow1[i].t = 'Mute'
+        context.btnsRow2[i].t = 'Solo'
+        context.btnsRow3[i].t = 'Rec'
+        context.btnsRow4[i].t = 'Select'
+    }
+}
 
 /**
  * @param {MR_FactoryMappingPage} page 
@@ -35,10 +49,11 @@ function makeZoomSubPage(page, subPageArea, context) {
 
 /**
  * @param {MR_DeviceDriver} deviceDriver 
- * @param {MR_FactoryMappingPage} page 
  * @param {object} context 
  */
-function makePageMixer(deviceDriver, page, context) {
+function makePageMixer(deviceDriver, context) {
+    var page = deviceDriver.mMapping.makePage('Mixer')
+
     var subPageArea = page.makeSubPageArea('mixer')
     var defaultSubPage = subPageArea.makeSubPage('default')
 
@@ -103,6 +118,11 @@ function makePageMixer(deviceDriver, page, context) {
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[7].note, 0])
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[8].note, 0])
         defaultVariable.setProcessValue(activeDevice, 1)
+        context.btnsL1U[7].t='Zoom'
+        context.btnsL1U[8].t='Marker'
+        setPageDefaultLabels(context)
+        sendLableApp1(activeDevice, context)
+        sendLableApp2(activeDevice, context)
     }.bind({ context })
 
     defaultSubPage.mOnActivate = function (activeDevice) {
@@ -125,6 +145,8 @@ function makePageMixer(deviceDriver, page, context) {
     markerSubPage.mOnDeactivate = function (activeDevice) {
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[8].note, 0])
     }
+
+    return page
 }
 
 module.exports = {

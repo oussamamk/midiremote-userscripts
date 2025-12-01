@@ -45,7 +45,6 @@ var instrumentsMapping = {
             smapping: true
         }
     }
-
 }
 
 /**
@@ -62,13 +61,12 @@ function getInstrumentMappping(name) {
     return mapping
 }
 
-
 /**
  * @param {MR_DeviceDriver} deviceDriver 
- * @param {MR_FactoryMappingPage} page 
  * @param {object} context
  */
-function makePageInstrument(deviceDriver, page, context) {
+function makePageInstrument(deviceDriver, context) {
+    var page = deviceDriver.mMapping.makePage('Instrument')
     var subPageArea = page.makeSubPageArea('InserEffects')
     var defaultSubPage = subPageArea.makeSubPage('default')
 
@@ -86,7 +84,6 @@ function makePageInstrument(deviceDriver, page, context) {
         page.makeCommandBinding(context.knobs2[i].d.mSurfaceValue, '', '')
     }
 
-
     var buttons = [false, false, false, false, false, false, false, false,
                    false, false, false, false, false, false, false, false]
     var knobs = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
@@ -102,7 +99,6 @@ function makePageInstrument(deviceDriver, page, context) {
         }
     }
 
-
     page.mHostAccess.mTrackSelection.mMixerChannel.mOnTitleChange = function(activeDevice, activeMapping, title) {
         console.log("title: " + title)
         if (instrumentsMapping[title]) {
@@ -116,8 +112,9 @@ function makePageInstrument(deviceDriver, page, context) {
             context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[i].note, 0])
             context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow2[i].note, 0])
         }
-
     }
+
+    return page
 }
 
 module.exports = {

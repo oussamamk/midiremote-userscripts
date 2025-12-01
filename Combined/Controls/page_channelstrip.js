@@ -155,10 +155,10 @@ function getChannelStripPluginMappping(name) {
 
 /**
  * @param {MR_DeviceDriver} deviceDriver 
- * @param {MR_FactoryMappingPage} page 
  * @param {object} context
  */
-function makePageChannelStrip(deviceDriver, page, context) {
+function makePageChannelStrip(deviceDriver, context) {
+    var page = deviceDriver.mMapping.makePage('ChannelStrip')
     var subPageArea = page.makeSubPageArea('ChannelStrip')
     var defaultSubPage = subPageArea.makeSubPage('default')
     var gateSubPage = subPageArea.makeSubPage('gate')
@@ -281,10 +281,21 @@ function makePageChannelStrip(deviceDriver, page, context) {
     defaultSubPage.mOnActivate = function (activeDevice) {
         for (var i = 0; i < context.numStrips1; i++) {
             context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[i].note, 0])
+            context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow1[i].note, 0])
             context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow2[i].note, 0])
+            context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow2[i].note, 0])
             context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow3[i].note, 0])
+            context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow2[i].note, 0])
             context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[i].note, 0])
+            context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[i].note, 0])
         }
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[5].note, 127])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[5].note, 127])
+    }.bind({ context })
+
+    defaultSubPage.mOnDeactivate = function (activeDevice) {
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[5].note, 0])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[5].note, 0])
     }.bind({ context })
 
     gateSubPage.mOnActivate = function (activeDevice) {
@@ -351,6 +362,8 @@ function makePageChannelStrip(deviceDriver, page, context) {
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 127])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
     }.bind({ context })
+
+    return page
 }
 
 module.exports = {

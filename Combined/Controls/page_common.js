@@ -375,8 +375,34 @@ function updateEffectsKnobsButtons(context, activeDevice, buttons, knobs) {
     }
 }
 
+function resetLabels1(context) {
+    for (var i = 0; i < context.numStrips1; i++) {
+        context.knobs1[i].t = ''
+        context.faders1[i].t = ''
+        context.btnsRow1[i].t = ''
+        context.btnsRow2[i].t = ''
+        context.btnsRow3[i].t = ''
+        context.btnsRow4[i].t = ''
+    }
+}
+
+function resetLabels2(context) {
+    for (var i = 0; i < context.numStrips2; i++) {
+        context.knobs2[i].t = ''
+        context.faders2[i].t = ''
+        context.btnsL1U[i].t = ''
+        context.btnsL1L[i].t = ''
+    }
+
+    for (var i = 0; i < 6; i++) {
+        context.btnControls[i].t = ''
+    }
+}
+
 module.exports = {
     makeSubPageTransportAndContols,
     bindInstrumentKnobsButtons,
-    updateEffectsKnobsButtons
+    updateEffectsKnobsButtons,
+    resetLabels1,
+    resetLabels2
 }

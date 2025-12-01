@@ -4,11 +4,11 @@ var makeSubPageTransportAndContols = page_common.makeSubPageTransportAndContols
 /**
  * 
  * @param {MR_DeviceDriver} deviceDriver 
- * @param {MR_FactoryMappingPage} page 
  * @param {object} context
  * @returns
  */
-function makePageCommands(deviceDriver, page, context) {
+function makePageCommands(deviceDriver, context) {
+    var page = deviceDriver.mMapping.makePage('Commands')
     var subPageArea = page.makeSubPageArea('commands')
     var defaultSubPage = subPageArea.makeSubPage('default')
 
@@ -18,6 +18,8 @@ function makePageCommands(deviceDriver, page, context) {
     page.makeCommandBinding(context.btnsRow1[1].d.mSurfaceValue, 'AddTrack', 'Audio').setSubPage(defaultSubPage)
     page.makeCommandBinding(context.btnsRow1[2].d.mSurfaceValue, 'Macro', 'Duplicate Selected Tracks without Data').setSubPage(defaultSubPage)
     page.makeCommandBinding(context.btnsRow4[0].d.mSurfaceValue, 'MIDI', 'Reset').setSubPage(defaultSubPage)
+
+    return page
 }
 
 module.exports = {
