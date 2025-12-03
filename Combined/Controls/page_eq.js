@@ -1,12 +1,16 @@
 var page_common = require('./page_common.js')
 var makeSubPageTransportAndContols = page_common.makeSubPageTransportAndContols
 var resetLabels1  = page_common.resetLabels1
+var resetLabels2  = page_common.resetLabels2
 
 var helper = require("./helper.js")
 var sendLableApp1 = helper.sendLableApp1
 var sendLableApp2 = helper.sendLableApp2
 
-function setPageDefaultLabels(context) {
+function setPageEQLabels(context) {
+    resetLabels1(context)
+    resetLabels2(context)
+
     context.knobs1[0].t = 'Band1 Freq'
     context.knobs1[1].t = 'Band1 Q'
     context.knobs1[2].t = 'Band2 Freq'
@@ -257,8 +261,7 @@ function makePageEQ(deviceDriver, context) {
     defaultSubPage.mOnActivate = function (activeDevice) {
         context.btnsL1U[7].t=''
         context.btnsL1U[8].t=''
-        resetLabels1(context)
-        setPageDefaultLabels(context)
+        setPageEQLabels(context)
         sendLableApp1(activeDevice, context)
         sendLableApp2(activeDevice, context)
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[4].note, 127])

@@ -43,24 +43,34 @@ function makeSubPageTransportAndContols(page, subPageArea, context) {
  * @param {number} baseID 
  * @param {number} pTag 
  * @param {object} mapping
- * @param {object} buttons
+ * @param {object} effectContext
  * @param {MR_HostValueUndefined} customVar
  * @param {*} pValue
  * @param {number} sPos
  * @param {number} offset
+ * @param {string} pName
  */
-function assignButtons(page, subPage, activeDevice, dam, context, sObjects, baseID, pTag, mapping, buttons, customVar, pValue, sPos, offset) {
+function assignButtons(page, subPage, activeDevice, dam, context, sObjects, baseID, pTag, mapping, effectContext, customVar, pValue, sPos, offset, pName) {
     var bb = page.makeValueBinding(sObjects[sPos - offset].d.mSurfaceValue, customVar)
     if (mapping.tbuttons == null || mapping.tbuttons.indexOf(pTag) < 0) {
         bb.setTypeToggle()
     }
     bb.setSubPage(subPage)
     bb.mOnValueChange = function (activeDevice, activeMapping, value, arg3) {
+        if (offset == 0) {
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[this.sPos].note, value > 0 ? 127 : 0 ])
+            context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow1[this.sPos].note, value > 0 ? 127 : 0 ])
+        } else {
+            context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsRow2[this.sPos - this.offset].note, value > 0 ? 127 : 0 ])
+            context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsRow2[this.sPos - this.offset].note, value > 0 ? 127 : 0 ])
+        }
         dam.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
-        buttons[this.sPos - this.offset] = value > 0 ? true : false
+        effectContext.values.buttons[sPos] = value > 0 ? true : false
     }.bind({ pTag, sPos, offset})
     sObjects[sPos - offset].d.mSurfaceValue.setProcessValue(activeDevice, pValue > 0 ? 1 : 0)
     context.midiOutput1.sendMidi(activeDevice, [0x90, sObjects[sPos - offset].note, pValue > 0 ? 127 : 0])
+    effectContext.names.buttons[sPos] = pName
+    effectContext.values.buttons[sPos] = pValue > 0 ? true : false
 }
 
 /**
@@ -68,44 +78,68 @@ function assignButtons(page, subPage, activeDevice, dam, context, sObjects, base
  * @param {MR_SubPage} subPage
  * @param {MR_ActiveDevice} activeDevice
  * @param {MR_HostObjectDirectAccess} dam
+ * @param {object} context
  * @param {object} sObjects
  * @param {number} baseID 
  * @param {number} pTag 
- * @param {object} faders
+ * @param {object} effectContext
  * @param {MR_HostValueUndefined} customVar
  * @param {*} pValue
  * @param {number} sPos
  * @param {number} offset
+ * @param {string} pName
  */
-function assignFaders(page, subPage, activeDevice, dam, sObjects, baseID, pTag, faders, customVar, pValue, sPos, offset)  {
-    page.makeValueBinding(sObjects[sPos - offset].d.mSurfaceValue, customVar).setValueTakeOverModePickup().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, value, arg3) {
+function assignFaders(page, subPage, activeDevice, dam, context, sObjects, baseID, pTag, effectContext, customVar, pValue, sPos, offset, pName) {
+    page.makeValueBinding(sObjects[sPos - offset].d.mSurfaceValue, customVar).setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, value, arg3) {
+        var result = Math.round(value * 127)
+        if (offset == 0) {
+            context.midiOutput1.sendMidi(activeDevice, [0xE0 + sPos, 0, result])
+            context.midiOutput3.sendMidi(activeDevice, [0xE0 + sPos, 0, result])
+        } else {
+            context.midiOutput2.sendMidi(activeDevice, [0xB0, context.faders2[this.sPos - this.offset].cc, result])
+            context.midiOutput4.sendMidi(activeDevice, [0xB0, context.faders2[this.sPos - this.offset].cc, result])
+        }
         dam.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
-        faders[this.sPos - this.offset] = value
-    }.bind({ pTag, sPos, offset })
-    sObjects[sPos - offset].d.mSurfaceValue.setProcessValue(activeDevice, pValue)
-}
-
-/**
- * @param {MR_FactoryMappingPage} page 
- * @param {MR_SubPage} subPage
- * @param {MR_ActiveDevice} activeDevice
- * @param {MR_HostObjectDirectAccess} dam
- * @param {object} sObjects
- * @param {number} baseID 
- * @param {number} pTag 
- * @param {object} knobs
- * @param {MR_HostValueUndefined} customVar
- * @param {*} pValue
- * @param {number} sPos
- * @param {number} offset
- */
-function assignKnobs(page, subPage, activeDevice, dam, sObjects, baseID, pTag, knobs, customVar, pValue, sPos, offset) {
-    page.makeValueBinding(sObjects[sPos - offset].d.mSurfaceValue, customVar).setValueTakeOverModePickup().setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, value, arg3) {
-        dam.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
-        knobs[this.sPos - this.offset] = value
+        effectContext.values.faders[sPos] = value
     }.bind({ pTag, sPos, offset})
     sObjects[sPos - offset].d.mSurfaceValue.setProcessValue(activeDevice, pValue)
-}    
+    effectContext.names.faders[sPos] = pName
+    effectContext.values.faders[sPos] = pValue
+}
+
+/**
+ * @param {MR_FactoryMappingPage} page 
+ * @param {MR_SubPage} subPage
+ * @param {MR_ActiveDevice} activeDevice
+ * @param {MR_HostObjectDirectAccess} dam
+ * @param {object} context
+ * @param {object} sObjects
+ * @param {number} baseID 
+ * @param {number} pTag 
+ * @param {object} effectContext
+ * @param {MR_HostValueUndefined} customVar
+ * @param {*} pValue
+ * @param {number} sPos
+ * @param {number} offset
+ * @param {string} pName
+ */
+function assignKnobs(page, subPage, activeDevice, dam, context, sObjects, baseID, pTag, effectContext, customVar, pValue, sPos, offset, pName) {
+    page.makeValueBinding(sObjects[sPos - offset].d.mSurfaceValue, customVar).setSubPage(subPage).mOnValueChange = function (activeDevice, activeMapping, value, arg3) {
+        var result = Math.round(value * 127)
+        if (offset == 0) {
+            context.midiOutput1.sendMidi(activeDevice, [0xB0, context.knobs1[this.sPos].cc, result])
+            context.midiOutput3.sendMidi(activeDevice, [0xB0, context.knobs1[this.sPos].cc, result])
+        } else {
+            context.midiOutput2.sendMidi(activeDevice, [0xB0, context.knobs2[this.sPos - this.offset].cc, result])
+            context.midiOutput4.sendMidi(activeDevice, [0xB0, context.knobs2[this.sPos - this.offset].cc, result])
+        }
+        dam.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
+        effectContext.values.knobs[sPos] = value
+    }.bind({ pTag, sPos, offset})
+    sObjects[sPos - offset].d.mSurfaceValue.setProcessValue(activeDevice, pValue)
+    effectContext.names.knobs[sPos] = pName
+    effectContext.values.knobs[sPos] = pValue
+}
 
 /**
  * @param {MR_FactoryMappingPage} page 
@@ -116,13 +150,11 @@ function assignKnobs(page, subPage, activeDevice, dam, sObjects, baseID, pTag, k
  * @param {number} baseID 
  * @param {object} mapping
  * @param {object} context
- * @param {object} buttons
- * @param {object} knobs
- * @param {object} faders
+ * @param {object} effectContext
  * @param {MR_HostValueUndefined} customVar
  * @param {boolean} autoButton
  */
-function dynamicInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping, dam, baseID, mapping, context, buttons, knobs, faders, customVar, autoButton) {
+function dynamicInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping, dam, baseID, mapping, context, effectContext, customVar, autoButton) {
     var numParams = dam.getNumberOfParameters(activeMapping, baseID)
     var arr = ['baseID:', baseID, 'numParams:', numParams]
     console.log(arr.join(' '))
@@ -168,51 +200,44 @@ function dynamicInstrumentKnobsButtons(page, subPage, activeDevice, activeMappin
                 isButton = true
             }
         }
-        
+
         if (bidx >= 0) {
-            buttons[bidx] = pValue > 0 ? true  : false
             sPos = bidx
 
             if (sPos < context.numStrips1) {
-                assignButtons(page, subPage, activeDevice, dam, context, context.btnsRow1, baseID, pTag, mapping, buttons, customVar, pValue, sPos, 0)
+                assignButtons(page, subPage, activeDevice, dam, context, context.btnsRow1, baseID, pTag, mapping, effectContext, customVar, pValue, sPos, 0, pName)
             } else if (sPos < (2 * context.numStrips1)) {
-                assignButtons(page, subPage, activeDevice, dam, context, context.btnsRow2, baseID, pTag, mapping, buttons, customVar, pValue, sPos - context.numStrips1, context.numStrips1)
+                assignButtons(page, subPage, activeDevice, dam, context, context.btnsRow2, baseID, pTag, mapping, effectContext, customVar, pValue, sPos, context.numStrips1, pName)
             }
         } else if (f1idx >= 0) {
-            faders[f1idx] = pValue
             sPos = f1idx
-            assignFaders(page, subPage, activeDevice, dam, context.faders1, baseID, pTag, faders, customVar, pValue, sPos, 0)
+            assignFaders(page, subPage, activeDevice, dam, context, context.faders1, baseID, pTag, faders, effectContext, customVar, pValue, sPos, 0, pName)
         } else if (f2idx >= 0) {
-            faders[f2idx + context.numStrips1] = pValue
             sPos = f2idx + context.numStrips1
-            assignFaders(page, subPage, activeDevice, dam, context.faders2, baseID, pTag, faders, customVar, pValue, sPos, context.numStrips1)
+            assignFaders(page, subPage, activeDevice, dam, context, context.faders2, baseID, pTag, faders, effectContext, customVar, pValue, sPos, context.numStrips1, pName)
         } else if (k1idx >= 0) {
-            knobs[k1idx] = pValue
             sPos = k1idx
-            assignKnobs(page, subPage, activeDevice, dam, context.knobs1, baseID, pTag, knobs, customVar, pValue, sPos, 0)
+            assignKnobs(page, subPage, activeDevice, dam, context, context.knobs1, baseID, pTag, effectContext, customVar, pValue, sPos, 0, pName)
         } else if (k2idx >= 0) {
-            knobs[k2idx + context.numStrips1] = pValue
             sPos = k2idx + context.numStrips1
-            assignKnobs(page, subPage, activeDevice, dam, context.knobs2, baseID, pTag, knobs, customVar, pValue, sPos, context.numStrips1)
+            assignKnobs(page, subPage, activeDevice, dam, context, context.knobs2, baseID, pTag, effectContext, customVar, pValue, sPos, context.numStrips1, pName)
         } else if (isButton && b < context.numStrips1) {
-            buttons[b] = pValue > 0 ? true  : false
             sPos = b
-            assignButtons(page, subPage, activeDevice, dam, context, context.btnsRow1, baseID, pTag, mapping, buttons, customVar, pValue, sPos, 0)
+            assignButtons(page, subPage, activeDevice, dam, context, context.btnsRow1, baseID, pTag, mapping, effectContext, customVar, pValue, sPos, 0, pName)
             b++
         } else if (isButton && b < (2 * context.numStrips1)) {
-            buttons[b] = pValue > 0 ? true  : false
             sPos = b
-            assignButtons(page, subPage, activeDevice, dam, context, context.btnsRow2, baseID, pTag, mapping, buttons, customVar, pValue, sPos, context.numStrips1)
+            assignButtons(page, subPage, activeDevice, dam, context, context.btnsRow2, baseID, pTag, mapping, effectContext, customVar, pValue, sPos, context.numStrips1, pName)
             b++
         } else if (k1 < context.numStrips1) {
             sPos = k1
-            assignKnobs(page, subPage, activeDevice, dam, context.knobs1, baseID, pTag, knobs, customVar, pValue, sPos, 0)
+            assignKnobs(page, subPage, activeDevice, dam, context, context.knobs1, baseID, pTag, effectContext, customVar, pValue, sPos, 0, pName)
             k1++
         } else if (k2 < context.numStrips2) {
             sPos = k2 + context.numStrips1
-            assignKnobs(page, subPage, activeDevice, dam, context.knobs2, baseID, pTag, knobs, customVar, pValue, sPos, context.numStrips1)
+            assignKnobs(page, subPage, activeDevice, dam, context, context.knobs2, baseID, pTag, effectContext, customVar, pValue, sPos, context.numStrips1, pName)
             k2++
-        } 
+        }
     }
 
     return b
@@ -227,12 +252,10 @@ function dynamicInstrumentKnobsButtons(page, subPage, activeDevice, activeMappin
  * @param {number} baseID 
  * @param {object} mapping
  * @param {object} context
- * @param {object} buttons
- * @param {object} knobs
- * @param {object} faders
+ * @param {object} effectContext
  * @param {MR_HostValueUndefined} customVar
  */
-function staticInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping, dam, baseID, mapping, context, buttons, knobs, faders, customVar) {
+function staticInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping, dam, baseID, mapping, context, effectContext, customVar) {
     var b = mapping.buttons != null ? mapping.buttons.length : 0
     var k1 = mapping.knobs1 != null ? mapping.knobs1.length : 0
     var k2 = mapping.knobs2 != null ? mapping.knobs2.length : 0
@@ -246,11 +269,11 @@ function staticInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping
         var pValue = dam.getParameterProcessValue(activeMapping, baseID, pTag)
         // var arr = ['pTag:', pTag, 'pName:', pName, 'pDisplayValue:', pDisplayValue, 'pValue', pValue]
         // console.log(arr.join(' '))
-        buttons[sPos] = pValue
+        effectContext.values.buttons[sPos] = pValue
         if (sPos < context.numStrips1) {
-            assignButtons(page, subPage, activeDevice, dam, context, context.btnsRow1, baseID, pTag, mapping, buttons, customVar, pValue, sPos, 0)
+            assignButtons(page, subPage, activeDevice, dam, context, context.btnsRow1, baseID, pTag, mapping, effectContext, customVar, pValue, sPos, 0, pName)
         } else if (sPos < (2 * context.numStrips1)) {
-            assignButtons(page, subPage, activeDevice, dam, context, context.btnsRow2, baseID, pTag, mapping, buttons, customVar, pValue, sPos + context.numStrips1, context.numStrips1)
+            assignButtons(page, subPage, activeDevice, dam, context, context.btnsRow2, baseID, pTag, mapping, effectContext, customVar, pValue, sPos + context.numStrips1, context.numStrips1, pName)
         }
     }
 
@@ -261,8 +284,7 @@ function staticInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping
         var pValue = dam.getParameterProcessValue(activeMapping, baseID, pTag)
         // var arr = ['pTag:', pTag, 'pName:', pName, 'pDisplayValue:', pDisplayValue, 'pValue', pValue]
         // console.log(arr.join(' '))
-        knobs[sPos] = pValue
-        assignKnobs(page, subPage, activeDevice, dam, context.knobs1, baseID, pTag, knobs, customVar, pValue, sPos, 0)
+        assignKnobs(page, subPage, activeDevice, dam, context, context.knobs1, baseID, pTag, effectContext, customVar, pValue, sPos, 0, pName)
     }
 
     for (var sPos = 0; sPos < k2; sPos++) {
@@ -272,8 +294,7 @@ function staticInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping
         var pValue = dam.getParameterProcessValue(activeMapping, baseID, pTag)
         // var arr = ['pTag:', pTag, 'pName:', pName, 'pDisplayValue:', pDisplayValue, 'pValue', pValue]
         // console.log(arr.join(' '))
-        knobs[sPos + context.numStrips1] = pValue
-        assignKnobs(page, subPage, activeDevice, dam, context.knobs2, baseID, pTag, knobs, customVar, pValue, sPos + context.numStrips1, context.numStrips1)
+        assignKnobs(page, subPage, activeDevice, dam, context, context.knobs2, baseID, pTag, effectContext, customVar, pValue, sPos + context.numStrips1, context.numStrips1, pName)
     }
 
     for (var sPos = 0; sPos < f1; sPos++) {
@@ -283,8 +304,7 @@ function staticInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping
         var pValue = dam.getParameterProcessValue(activeMapping, baseID, pTag)
         // var arr = ['pTag:', pTag, 'pName:', pName, 'pDisplayValue:', pDisplayValue, 'pValue', pValue]
         // console.log(arr.join(' '))
-        faders[sPos] = pValue
-        assignFaders(page, subPage, activeDevice, dam, context.faders1, baseID, pTag, faders, customVar, pValue, sPos, 0)
+        assignFaders(page, subPage, activeDevice, dam, context, context.faders1, baseID, pTag, effectContext, customVar, pValue, sPos, 0, pName)
     }
 
     for (var sPos = 0; sPos < f2; sPos++) {
@@ -294,8 +314,7 @@ function staticInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping
         var pValue = dam.getParameterProcessValue(activeMapping, baseID, pTag)
         // var arr = ['pTag:', pTag, 'pName:', pName, 'pDisplayValue:', pDisplayValue, 'pValue', pValue]
         // console.log(arr.join(' '))
-        faders[sPos + context.numStrips1] = pValue
-        assignFaders(page, subPage, activeDevice, dam, context.faders2, baseID, pTag, faders, customVar, pValue, sPos + context.numStrips1, context.numStrips1)
+        assignFaders(page, subPage, activeDevice, dam, context, context.faders2, baseID, pTag, effectContext, customVar, pValue, sPos + context.numStrips1, context.numStrips1, pName)
     }
 }
 
@@ -307,36 +326,35 @@ function staticInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping
  * @param {object} context
  * @param {MR_ActiveDevice} activeDevice
  * @param {MR_ActiveMapping} activeMapping
- * @param {object} buttons
- * @param {object} knobs
- * @param {object} faders
+ * @param {object} effectContext
  * @param {object} mapping
  * @param {boolean} autoButton
  */
-function bindInstrumentKnobsButtons(page, subPage, customVar, stripEffectType, context, activeDevice, activeMapping, buttons, knobs, faders, mapping, autoButton) {
-    buttons.length = 0
-    knobs.length = 0
+function bindInstrumentKnobsButtons(page, subPage, customVar, stripEffectType, context, activeDevice, activeMapping, effectContext, mapping, autoButton) {
     var pZone = stripEffectType.mParameterBankZone
     var dam = page.mHostAccess.makeDirectAccess(pZone)
     var baseID = dam.getBaseObjectID(activeMapping)
     var b = mapping.buttons != null ? mapping.buttons.length : 0
 
-    for (var i = 0; i < (2 * context.numStrips1); i++) {
-        buttons[i] = false
+    for (var i = 0; i < effectContext.values.buttons.length; i++) {
+        effectContext.values.buttons[i] = false
+        effectContext.names.buttons[i] = ''
     }
 
     for (var i = 0; i < (context.numStrips1 + context.numStrips2); i++) {
-        knobs[i] = 0
+        effectContext.values.knobs[i] = 0
+        effectContext.names.knobs[i] = ''
     }
 
     for (var i = 0; i < (context.numStrips1 + context.numStrips2); i++) {
-        faders[i] = 0
+        effectContext.values.faders[i] = 0
+        effectContext.names.faders[i] = ''
     }
 
     if (mapping.smapping) {
-        staticInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping, dam, baseID, mapping, context, buttons, knobs, faders, customVar)
+        staticInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping, dam, baseID, mapping, context, effectContext, customVar)
     } else {
-        b = dynamicInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping, dam, baseID, mapping, context, buttons, knobs, faders, customVar, autoButton)
+        b = dynamicInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping, dam, baseID, mapping, context, effectContext, customVar, autoButton)
     }
 
     // bind the unused to dummy
@@ -352,25 +370,66 @@ function bindInstrumentKnobsButtons(page, subPage, customVar, stripEffectType, c
 /**
  * @param {object} context
  * @param {MR_ActiveDevice} activeDevice
- * @param {object} buttons
- * @param {object} knobs
+ * @param {object} effectContext
  */
-function updateEffectsKnobsButtons(context, activeDevice, buttons, knobs) {
-    for (var i = 0; i < buttons.length; i++) {
+function updateEffectsKnobsButtons(context, activeDevice, effectContext) {
+    for (var i = 0; i < effectContext.values.buttons.length; i++) {
         if (i < context.numStrips1) {
-            context.btnsRow1[i].d.mSurfaceValue.setProcessValue(activeDevice, buttons[i] == true ? 1 : 0)
-            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[i].note, (buttons[i] == true ? 127 :  0)])
+            context.btnsRow1[i].d.mSurfaceValue.setProcessValue(activeDevice, effectContext.values.buttons[i] == true ? 1 : 0)
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[i].note, (effectContext.values.buttons[i] == true ? 127 : 0)])
+            context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow1[i].note, (effectContext.values.buttons[i] == true ? 127 : 0)])
         } else if (i < 2 * context.numStrips1) {
-            context.btnsRow2[i - context.numStrips1].d.mSurfaceValue.setProcessValue(activeDevice, buttons[i] == true ? 1 : 0)
-            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow2[i - context.numStrips1].note, (buttons[i] == true ? 127 : 0)])
+            context.btnsRow2[i - context.numStrips1].d.mSurfaceValue.setProcessValue(activeDevice, effectContext.values.buttons[i] == true ? 1 : 0)
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow2[i - context.numStrips1].note, (effectContext.values.buttons[i] == true ? 127 : 0)])
+            context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow2[i - context.numStrips1].note, (effectContext.values.buttons[i] == true ? 127 : 0)])
         }
     }
 
-    for (var i = 0; i < knobs.length; i++) {
+    for (var i = 0; i < effectContext.values.knobs.length; i++) {
+        var result = Math.round(effectContext.values.knobs[i] * 127)
         if (i < context.numStrips1) {
-            context.knobs1[i].d.mSurfaceValue.setProcessValue(activeDevice, knobs[i])
+            context.knobs1[i].d.mSurfaceValue.setProcessValue(activeDevice, effectContext.values.knobs[i])
+            context.midiOutput1.sendMidi(activeDevice, [0xB0, context.knobs1[i].cc, result])
+            context.midiOutput3.sendMidi(activeDevice, [0xB0, context.knobs1[i].cc, result])
         } else if (i < context.numStrips1 + context.numStrips2) {
-            context.knobs2[i - context.numStrips1].d.mSurfaceValue.setProcessValue(activeDevice, knobs[i])
+            context.knobs2[i - context.numStrips1].d.mSurfaceValue.setProcessValue(activeDevice, effectContext.values.knobs[i])
+            context.midiOutput2.sendMidi(activeDevice, [0xB0, context.knobs2[i - context.numStrips1].cc, result])
+            context.midiOutput4.sendMidi(activeDevice, [0xB0, context.knobs2[i - context.numStrips1].cc, result])
+        }
+    }
+
+    for (var i = 0; i < effectContext.values.faders.length; i++) {
+        var result = Math.round(effectContext.values.faders[i] * 127)
+        if (i < context.numStrips1) {
+            context.faders1[i].d.mSurfaceValue.setProcessValue(activeDevice, effectContext.values.faders[i])
+        } else if (i < context.numStrips1 + context.numStrips2) {
+            var result = Math.round(effectContext.values.faders[i] * 127)
+            context.faders2[i - context.numStrips1].d.mSurfaceValue.setProcessValue(activeDevice, effectContext.values.faders[i])
+            context.midiOutput2.sendMidi(activeDevice, [0xB0, context.faders2[i - context.numStrips1].cc, result])
+            context.midiOutput4.sendMidi(activeDevice, [0xB0, context.faders2[i - context.numStrips1].cc, result])
+        }
+    }
+
+    for (var i = 0; i < effectContext.names.buttons.length; i++) {
+        if (i < context.numStrips1) {
+            context.btnsRow1[i].t = effectContext.names.buttons[i]
+        } else if (i < 2 * context.numStrips1) {
+            context.btnsRow2[i - context.numStrips1].t = effectContext.names.buttons[i]
+        }
+    }
+    for (var i = 0; i < effectContext.names.knobs.length; i++) {
+        if (i < context.numStrips1) {
+            context.knobs1[i].t = effectContext.names.knobs[i]
+        } else if (i < context.numStrips1 + context.numStrips2) {
+            context.knobs2[i - context.numStrips1].t = effectContext.names.knobs[i]
+        }
+    }
+
+    for (var i = 0; i < effectContext.names.faders.length; i++) {
+        if (i < context.numStrips1) {
+            context.faders1[i].t = effectContext.names.faders[i]
+        } else if (i < context.numStrips1 + context.numStrips2) {
+            context.faders2[i - context.numStrips1].t = effectContext.names.faders[i]
         }
     }
 }
@@ -390,12 +449,6 @@ function resetLabels2(context) {
     for (var i = 0; i < context.numStrips2; i++) {
         context.knobs2[i].t = ''
         context.faders2[i].t = ''
-        context.btnsL1U[i].t = ''
-        context.btnsL1L[i].t = ''
-    }
-
-    for (var i = 0; i < 6; i++) {
-        context.btnControls[i].t = ''
     }
 }
 

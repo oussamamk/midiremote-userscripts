@@ -82,6 +82,7 @@ function makeKnob1(deviceDriver, context, i, cc, x, y, w, h, idx) {
         .bindToControlChange(0, cc)
         .setTypeRelativeSignedBit()
 
+    knob.cc = cc
     knob.idx = idx
     knob.d.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value) {
         var result = Math.round(value * 127)
@@ -137,6 +138,7 @@ function makeKnob2(deviceDriver, context, cc, x, y, w, h, idx) {
         .bindToControlChange(0, cc)
         .setTypeAbsolute()
 
+    knob.cc = cc
     knob.idx = idx
     knob.d.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value) {
         var result = Math.round(value * 127)
@@ -167,6 +169,7 @@ function makeFader2(deviceDriver, context, i, cc, x, y, w, h, idx) {
         .bindToControlChange(0, cc)
         .setTypeAbsolute()
 
+    fader.cc = cc
     fader.idx = idx
     fader.d.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value) {
         var result = Math.round(value * 127)

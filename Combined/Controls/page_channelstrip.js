@@ -2,6 +2,113 @@ var page_common = require('./page_common.js')
 var makeSubPageTransportAndContols = page_common.makeSubPageTransportAndContols
 var bindInstrumentKnobsButtons = page_common.bindInstrumentKnobsButtons
 var updateEffectsKnobsButtons = page_common.updateEffectsKnobsButtons
+var resetLabels1 = page_common.resetLabels1
+var resetLabels2 = page_common.resetLabels2
+
+var helper = require("./helper.js")
+var sendLableApp1 = helper.sendLableApp1
+var sendLableApp2 = helper.sendLableApp2
+
+function setPageChannelStripLabels(context) {
+    resetLabels1(context)
+    resetLabels2(context)
+    context.btnsRow1[0].t = 'Gate On/Off'
+    context.btnsRow2[0].t = 'Gate Bypass'
+    context.btnsRow3[0].t = 'Gate Load Preset'
+    context.btnsRow4[0].t = 'Gate SubPage'
+    context.btnsRow1[1].t = 'Comp On/Off'
+    context.btnsRow2[1].t = 'Comp Bypass'
+    context.btnsRow3[1].t = 'Comp Load Preset'
+    context.btnsRow4[1].t = 'Comp SubPage'
+    context.btnsRow1[2].t = 'Tools On/Off'
+    context.btnsRow2[2].t = 'Tools Bypass'
+    context.btnsRow3[2].t = 'Tools Load Preset'
+    context.btnsRow4[2].t = 'Tools SubPage'
+    context.btnsRow1[3].t = 'Saturator On/Off'
+    context.btnsRow2[3].t = 'Saturator Bypass'
+    context.btnsRow3[3].t = 'Saturator Load Preset'
+    context.btnsRow4[3].t = 'Saturator SubPage'
+    context.btnsRow1[4].t = 'Limiter On/Off'
+    context.btnsRow2[4].t = 'Limiter Bypass'
+    context.btnsRow3[4].t = 'Limiter Load Preset'
+    context.btnsRow4[4].t = 'Limiter SubPage'
+}
+
+function setSubPageGateLabels(context) {
+    resetLabels1(context)
+    resetLabels2(context)
+    context.btnsRow3[0].t = 'Gate Load Preset'
+    context.btnsRow4[0].t = 'Back Page'
+    context.btnsRow3[1].t = 'Comp Load Preset'
+    context.btnsRow4[1].t = 'Comp SubPage'
+    context.btnsRow3[2].t = 'Tools Load Preset'
+    context.btnsRow4[2].t = 'Tools SubPage'
+    context.btnsRow3[3].t = 'Saturator Load Preset'
+    context.btnsRow4[3].t = 'Saturator SubPage'
+    context.btnsRow3[4].t = 'Limiter Load Preset'
+    context.btnsRow4[4].t = 'Limiter SubPage'
+}
+
+function setSubPageCompLabels(context) {
+    resetLabels1(context)
+    resetLabels2(context)
+    context.btnsRow3[0].t = 'Gate Load Preset'
+    context.btnsRow4[0].t = 'Gate SubPage'
+    context.btnsRow3[1].t = 'Comp Load Preset'
+    context.btnsRow4[1].t = 'Back Page'
+    context.btnsRow3[2].t = 'Tools Load Preset'
+    context.btnsRow4[2].t = 'Tools SubPage'
+    context.btnsRow3[3].t = 'Saturator Load Preset'
+    context.btnsRow4[3].t = 'Saturator SubPage'
+    context.btnsRow3[4].t = 'Limiter Load Preset'
+    context.btnsRow4[4].t = 'Limiter SubPage'
+}
+
+function setSubPageToolsLabels(context) {
+    resetLabels1(context)
+    resetLabels2(context)
+    context.btnsRow3[0].t = 'Gate Load Preset'
+    context.btnsRow4[0].t = 'Gate SubPage'
+    context.btnsRow3[1].t = 'Comp Load Preset'
+    context.btnsRow4[1].t = 'Comp SubPage'
+    context.btnsRow3[2].t = 'Tools Load Preset'
+    context.btnsRow4[2].t = 'Back Page'
+    context.btnsRow3[3].t = 'Saturator Load Preset'
+    context.btnsRow4[3].t = 'Saturator SubPage'
+    context.btnsRow3[4].t = 'Limiter Load Preset'
+    context.btnsRow4[4].t = 'Limiter SubPage'
+}
+
+function setSubPageSaturatorLabels(context) {
+    resetLabels1(context)
+    resetLabels2(context)
+    context.btnsRow3[0].t = 'Gate Load Preset'
+    context.btnsRow4[0].t = 'Gate SubPage'
+    context.btnsRow3[1].t = 'Comp Load Preset'
+    context.btnsRow4[1].t = 'Comp SubPage'
+    context.btnsRow3[2].t = 'Tools Load Preset'
+    context.btnsRow4[2].t = 'Tools SubPage'
+    context.btnsRow3[3].t = 'Saturator Load Preset'
+    context.btnsRow4[3].t = 'Back Page'
+    context.btnsRow3[4].t = 'Limiter Load Preset'
+    context.btnsRow4[4].t = 'Limiter SubPage'
+}
+
+function setSubPageLimiterLabels(context) {
+    resetLabels1(context)
+    resetLabels2(context)
+    context.btnsRow3[0].t = 'Gate Load Preset'
+    context.btnsRow4[0].t = 'Gate SubPage'
+    context.btnsRow3[1].t = 'Comp Load Preset'
+    context.btnsRow4[1].t = 'Comp SubPage'
+    context.btnsRow3[2].t = 'Tools Load Preset'
+    context.btnsRow4[2].t = 'Tools SubPage'
+    context.btnsRow3[3].t = 'Saturator Load Preset'
+    context.btnsRow4[3].t = 'Saturator SubPage'
+    context.btnsRow3[4].t = 'Limiter Load Preset'
+    context.btnsRow4[4].t = 'Back Page'
+}
+
 /**
  * @param {MR_FactoryMappingPage} page 
  * @param {MR_SubPage} subPage
@@ -45,7 +152,7 @@ var stripChannelEffectsMapping = {
         return {
             knobs1: [4201, 4210, 4202, 4203, 4205],
             buttons: [4216, 4211, 4215],
-            ignore: ['InVu', 'OutVu',  , 'Red', 'MakeupMode'],
+            ignore: ['InVu', 'OutVu', , 'Red', 'MakeupMode'],
             smapping: false
         }
     },
@@ -66,7 +173,7 @@ var stripChannelEffectsMapping = {
             smapping: false
         }
     },
-   'DeEsser': function () {
+    'DeEsser': function () {
         return {
             knobs1: [4202, 4201, 4206, 4240, 4241],
             buttons: [4209, 4207, 4242, 4244],
@@ -110,7 +217,7 @@ var stripChannelEffectsMapping = {
         return {
             knobs1: [4201, 4203],
             buttons: [4215, 4211],
-            ignore: ['Input Vu', 'Output Vu', ],
+            ignore: ['Input Vu', 'Output Vu',],
             smapping: false
         }
     },
@@ -135,19 +242,12 @@ var stripChannelEffectsMapping = {
 /**
  * @param {string} name
  */
-function getChannelStripPluginMappping(name) {
+function getChannelStripPluginMapping(name) {
     var mapping = {}
-    if (stripChannelEffectsMapping[name])  {
+    if (stripChannelEffectsMapping[name]) {
         mapping = stripChannelEffectsMapping[name]()
     }
     else {
-        // mapping.buttons = []
-        // mapping.tbuttons = []
-        // mapping.knobs1 = []
-        // mapping.knobs2 = []
-        // mapping.faders1 = []
-        // mapping.faders2 = []
-        // mapping.ignore = []
         mapping.smapping = true
     }
     return mapping
@@ -223,59 +323,105 @@ function makePageChannelStrip(deviceDriver, context) {
         makeStripEffectBinding(page, defaultSubPage, customVar, stripEffects[type], context, i)
     }
 
-    var gateButtons = [false, false, false, false, false, false, false, false,
-                   false, false, false, false, false, false, false, false]
-    var gateKnobs = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
-                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
-    var gateFaders = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
-                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
+    var gateContext = {}
+    gateContext.values = {}
+    gateContext.values.buttons = [false, false, false, false, false, false, false, false,
+        false, false, false, false, false, false, false, false]
+    gateContext.values.knobs = [0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0]
+    gateContext.values.faders = [0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0]
+    gateContext.names = {}
+    gateContext.names.buttons = ['', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '']
+    gateContext.names.knobs = ['', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '', '']
+    gateContext.names.faders = ['', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '', '']
     stripEffects.mGate.mOnChangePluginIdentity = function (activeDevice, activeMapping, name, vendor, version, formatVersion) {
-        var mapping = getChannelStripPluginMappping(name)
-        bindInstrumentKnobsButtons(page, gateSubPage, customVar, stripEffects.mGate, context, activeDevice, activeMapping, gateButtons, gateKnobs, gateFaders, mapping, true)
-    }
+        var mapping = getChannelStripPluginMapping(name)
+        bindInstrumentKnobsButtons(page, gateSubPage, customVar, stripEffects.mGate, context, activeDevice, activeMapping, gateContext, mapping, true)
+    }.bind({ context, gateContext })
 
-    var compButtons = [false, false, false, false, false, false, false, false,
-                   false, false, false, false, false, false, false, false]
-    var compKnobs = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
-                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
-    var compFaders = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
-                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
+
+    var compContext = {}
+    compContext.values = {}
+    compContext.values.buttons = [false, false, false, false, false, false, false, false,
+        false, false, false, false, false, false, false, false]
+    compContext.values.knobs = [0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0]
+    compContext.values.faders = [0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0]
+    compContext.names = {}
+    compContext.names.buttons = ['', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '']
+    compContext.names.knobs = ['', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '', '']
+    compContext.names.faders = ['', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '', '']
     stripEffects.mCompressor.mOnChangePluginIdentity = function (activeDevice, activeMapping, name, vendor, version, formatVersion) {
-        var mapping = getChannelStripPluginMappping(name)
-        bindInstrumentKnobsButtons(page, compressorSubPage, customVar, stripEffects.mCompressor, context, activeDevice, activeMapping, compButtons, compKnobs, compFaders, mapping, true)
+        var mapping = getChannelStripPluginMapping(name)
+        bindInstrumentKnobsButtons(page, compressorSubPage, customVar, stripEffects.mCompressor, context, activeDevice, activeMapping, compContext, mapping, true)
     }
 
-    var toolsButtons = [false, false, false, false, false, false, false, false,
-                   false, false, false, false, false, false, false, false]
-    var toolsKnobs = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
-                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
-    var toolsFaders = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
-                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
+    var toolsContext = {}
+    toolsContext.values = {}
+    toolsContext.values.buttons = [false, false, false, false, false, false, false, false,
+        false, false, false, false, false, false, false, false]
+    toolsContext.values.knobs = [0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0]
+    toolsContext.values.faders = [0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0]
+    toolsContext.names = {}
+    toolsContext.names.buttons = ['', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '']
+    toolsContext.names.knobs = ['', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '', '']
+    toolsContext.names.faders = ['', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '', '']
     stripEffects.mTools.mOnChangePluginIdentity = function (activeDevice, activeMapping, name, vendor, version, formatVersion) {
-        var mapping = getChannelStripPluginMappping(name)
-        bindInstrumentKnobsButtons(page, toolsSubPage, customVar, stripEffects.mTools, context, activeDevice, activeMapping, toolsButtons, toolsKnobs, toolsFaders, mapping, true)
+        var mapping = getChannelStripPluginMapping(name)
+        bindInstrumentKnobsButtons(page, toolsSubPage, customVar, stripEffects.mTools, context, activeDevice, activeMapping, toolsContext, mapping, true)
     }
 
-    var saturatorButtons = [false, false, false, false, false, false, false, false,
-                   false, false, false, false, false, false, false, false]
-    var saturatorKnobs = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
-                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
-    var saturatorFaders = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
-                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
+    var saturatorContext = {}
+    saturatorContext.values = {}
+    saturatorContext.values.buttons = [false, false, false, false, false, false, false, false,
+        false, false, false, false, false, false, false, false]
+    saturatorContext.values.knobs = [0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0]
+    saturatorContext.values.faders = [0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0]
+    saturatorContext.names = {}
+    saturatorContext.names.buttons = ['', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '']
+    saturatorContext.names.knobs = ['', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '', '']
+    saturatorContext.names.faders = ['', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '', '']
     stripEffects.mSaturator.mOnChangePluginIdentity = function (activeDevice, activeMapping, name, vendor, version, formatVersion) {
-        var mapping = getChannelStripPluginMappping(name)
-        bindInstrumentKnobsButtons(page, saturatorSubPage, customVar, stripEffects.mSaturator, context, activeDevice, activeMapping, saturatorButtons, saturatorKnobs, saturatorFaders, mapping, true)
+        var mapping = getChannelStripPluginMapping(name)
+        bindInstrumentKnobsButtons(page, saturatorSubPage, customVar, stripEffects.mSaturator, context, activeDevice, activeMapping, saturatorContext, mapping, true)
     }
 
-    var limiterButtons = [false, false, false, false, false, false, false, false,
-                   false, false, false, false, false, false, false, false]
-    var limiterKnobs = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
-                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
-    var limiterFaers = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
-                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
+    var limiterContext = {}
+    limiterContext.values = {}
+    limiterContext.values.buttons = [false, false, false, false, false, false, false, false,
+        false, false, false, false, false, false, false, false]
+    limiterContext.values.knobs = [0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0]
+    limiterContext.values.faders = [0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0]
+    limiterContext.names = {}
+    limiterContext.names.buttons = ['', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '']
+    limiterContext.names.knobs = ['', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '', '']
+    limiterContext.names.faders = ['', '', '', '', '', '', '', '',
+        '', '', '', '', '', '', '', '', '']
     stripEffects.mLimiter.mOnChangePluginIdentity = function (activeDevice, activeMapping, name, vendor, version, formatVersion) {
-        var mapping = getChannelStripPluginMappping(name)
-        bindInstrumentKnobsButtons(page, limiterSubPage, customVar, stripEffects.mLimiter, context, activeDevice, activeMapping, limiterButtons, limiterKnobs, limiterFaers, mapping, true)
+        var mapping = getChannelStripPluginMapping(name)
+        bindInstrumentKnobsButtons(page, limiterSubPage, customVar, stripEffects.mLimiter, context, activeDevice, activeMapping, limiterContext, mapping, true)
     }
 
     defaultSubPage.mOnActivate = function (activeDevice) {
@@ -285,83 +431,125 @@ function makePageChannelStrip(deviceDriver, context) {
             context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow2[i].note, 0])
             context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow2[i].note, 0])
             context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow3[i].note, 0])
-            context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow2[i].note, 0])
+            context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow3[i].note, 0])
             context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[i].note, 0])
             context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[i].note, 0])
         }
+
+        context.btnsL1U[7].t = ''
+        context.btnsL1U[8].t = ''
+        setPageChannelStripLabels(context)
+        sendLableApp1(activeDevice, context)
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[5].note, 127])
         context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[5].note, 127])
-    }.bind({ context })
+    }
 
     defaultSubPage.mOnDeactivate = function (activeDevice) {
-        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[5].note, 0])
-        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[5].note, 0])
-    }.bind({ context })
+    }
 
     gateSubPage.mOnActivate = function (activeDevice) {
-        updateEffectsKnobsButtons(context, activeDevice, gateButtons, gateKnobs)
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 127])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
-    }.bind({ context })
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 127])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
+        setSubPageGateLabels(context)
+        updateEffectsKnobsButtons(context, activeDevice, gateContext)
+        sendLableApp1(activeDevice, context)
+        sendLableApp2(activeDevice, context)
+    }
 
     gateSubPage.mOnDeactivate = function (activeDevice) {
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
-    }.bind({ context })
+    }
 
     compressorSubPage.mOnActivate = function (activeDevice) {
-        updateEffectsKnobsButtons(context, activeDevice, compButtons, compKnobs)
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 127])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
-    }.bind({ context })
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 127])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
+        setSubPageCompLabels(context)
+        updateEffectsKnobsButtons(context, activeDevice, compContext)
+        sendLableApp1(activeDevice, context)
+        sendLableApp2(activeDevice, context)
+    }
 
     compressorSubPage.mOnDeactivate = function (activeDevice) {
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
-    }.bind({ context })
-
+    }
     toolsSubPage.mOnActivate = function (activeDevice) {
-        updateEffectsKnobsButtons(context, activeDevice, toolsButtons, toolsKnobs)
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 127])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
-    }.bind({ context })
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 127])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
+        setSubPageToolsLabels(context)
+        updateEffectsKnobsButtons(context, activeDevice, toolsContext)
+        sendLableApp1(activeDevice, context)
+        sendLableApp2(activeDevice, context)
+    }
 
     toolsSubPage.mOnDeactivate = function (activeDevice) {
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
-    }.bind({ context })
+    }
 
     saturatorSubPage.mOnActivate = function (activeDevice) {
-        updateEffectsKnobsButtons(context, activeDevice, saturatorButtons, saturatorKnobs)
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 127])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
-    }.bind({ context })
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 127])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
+        setSubPageSaturatorLabels(context)
+        updateEffectsKnobsButtons(context, activeDevice, saturatorContext)
+        sendLableApp1(activeDevice, context)
+        sendLableApp2(activeDevice, context)
+    }
 
     saturatorSubPage.mOnDeactivate = function (activeDevice) {
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
-    }.bind({ context })
+    }
 
     limiterSubPage.mOnActivate = function (activeDevice) {
-        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 127])
-    }.bind({ context })
-
-    limiterSubPage.mOnDeactivate = function (activeDevice) {
-        updateEffectsKnobsButtons(context, activeDevice, limiterButtons, limiterKnobs)
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
-        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 127])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
+        context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 127])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[0].note, 0])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[1].note, 0])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[2].note, 0])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[3].note, 0])
+        context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 127])
+        setSubPageLimiterLabels(context)
+        updateEffectsKnobsButtons(context, activeDevice, limiterContext)
+        sendLableApp1(activeDevice, context)
+        sendLableApp2(activeDevice, context)
+    }
+
+    limiterSubPage.mOnDeactivate = function (activeDevice) {
         context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[4].note, 0])
-    }.bind({ context })
+    }
 
     return page
 }

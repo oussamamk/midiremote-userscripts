@@ -84,18 +84,27 @@ function makePageInstrument(deviceDriver, context) {
         page.makeCommandBinding(context.knobs2[i].d.mSurfaceValue, '', '')
     }
 
-    var buttons = [false, false, false, false, false, false, false, false,
-                   false, false, false, false, false, false, false, false]
-    var knobs = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
-                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
-    var faders = [0, 0, 0, 0 , 0 ,0 ,0 , 0,
-                 0, 0, 0, 0 , 0 ,0 ,0 , 0, 0]
+    var effectContext = {}
+    effectContext.values = {}
+    effectContext.values.buttons = [false, false, false, false, false, false, false, false,
+        false, false, false, false, false, false, false, false]
+    effectContext.values.knobs = [0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0]
+    effectContext.values.faders = [0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0]
+    effectContext.names = {}
+    effectContext.names.buttons = ['', '', '', '', '', '', '', '',
+                                 '', '', '', '', '', '', '', '']
+    effectContext.names.knobs = ['', '', '', '', '', '', '', '',
+                              '', '', '', '', '', '', '', '', '']
+    effectContext.names.faders = ['', '', '', '', '', '', '', '',
+                              '', '', '', '', '', '', '', '', '']
     instrument.mOnChangePluginIdentity = function (activeDevice, activeMapping, name, vendor, version, format) {
         var arr = ["name:", name, "vendor:", vendor, "version:", version, "format:", format]
         console.log(arr.join(' '))
         if (instrumentsMapping[name]) {
             var mapping = getInstrumentMappping(name)
-            bindInstrumentKnobsButtons(page, defaultSubPage, customVar, instrument, context, activeDevice, activeMapping, buttons, knobs, faders, mapping, false)
+            bindInstrumentKnobsButtons(page, defaultSubPage, customVar, instrument, context, activeDevice, activeMapping, effectContext, mapping, false)
         }
     }
 
@@ -103,7 +112,7 @@ function makePageInstrument(deviceDriver, context) {
         console.log("title: " + title)
         if (instrumentsMapping[title]) {
             var mapping = getInstrumentMappping(title)
-            bindInstrumentKnobsButtons(page, defaultSubPage, customVar, instrument, context, activeDevice, activeMapping, buttons, knobs, faders, mapping, false)
+            bindInstrumentKnobsButtons(page, defaultSubPage, customVar, instrument, context, activeDevice, activeMapping, effectContext, mapping, false)
         }
     }
 

@@ -52,29 +52,38 @@ function sendLableApp1(activeDevice, context) {
 function sendLableApp2(activeDevice, context) {
     var data = [0xf0, 0x00, 0x00]
     for (var i = 0; i < context.numStrips2; i++) {
-        data.push(context.knobs2[i].idx, context.knobs2[i].t.length)
-        for (var j = 0; j < context.knobs2[i].t.length; j++) {
-            data.push(context.knobs2[i].t.charCodeAt(j))
+        if (context.knobs2[i].t != null) {
+            data.push(context.knobs2[i].idx, context.knobs2[i].t.length)
+            for (var j = 0; j < context.knobs2[i].t.length; j++) {
+                data.push(context.knobs2[i].t.charCodeAt(j))
+            }
+            data.push(0)
         }
-        data.push(0)
 
-        data.push(context.faders2[i].idx, context.faders2[i].t.length)
-        for (var j = 0; j < context.faders2[i].t.length; j++) {
-            data.push(context.faders2[i].t.charCodeAt(j))
-        }
-        data.push(0)
 
-        data.push(context.btnsL1U[i].idx, context.btnsL1U[i].t.length)
-        for (var j = 0; j < context.btnsL1U[i].t.length; j++) {
-            data.push(context.btnsL1U[i].t.charCodeAt(j))
+        if (context.faders2[i].t != null) {
+            data.push(context.faders2[i].idx, context.faders2[i].t.length)
+            for (var j = 0; j < context.faders2[i].t.length; j++) {
+                data.push(context.faders2[i].t.charCodeAt(j))
+            }
+            data.push(0)
         }
-        data.push(0)
 
-        data.push(context.btnsL1L[i].idx, context.btnsL1L[i].t.length)
-        for (var j = 0; j < context.btnsL1L[i].t.length; j++) {
-            data.push(context.btnsL1L[i].t.charCodeAt(j))
+        if (context.btnsL1U[i].t != null) {
+            data.push(context.btnsL1U[i].idx, context.btnsL1U[i].t.length)
+            for (var j = 0; j < context.btnsL1U[i].t.length; j++) {
+                data.push(context.btnsL1U[i].t.charCodeAt(j))
+            }
+            data.push(0)
         }
-        data.push(0)
+
+        if (context.btnsL1L[i].t != null) {
+            data.push(context.btnsL1L[i].idx, context.btnsL1L[i].t.length)
+            for (var j = 0; j < context.btnsL1L[i].t.length; j++) {
+                data.push(context.btnsL1L[i].t.charCodeAt(j))
+            }
+            data.push(0)
+        }
     }
     data.push(0xf7)
     context.midiOutput4.sendMidi(activeDevice, data)

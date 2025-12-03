@@ -1,6 +1,21 @@
 var page_common = require('./page_common.js')
 var makeSubPageTransportAndContols = page_common.makeSubPageTransportAndContols
+var resetLabels1 = page_common.resetLabels1
 
+var helper = require("./helper.js")
+var sendLableApp1 = helper.sendLableApp1
+var sendLableApp2 = helper.sendLableApp2
+
+/**
+ * @param {object} context
+*/
+function setPageSendsLabels(context) {
+    for (var idx = 0; idx < 8; idx++) {
+        context.btnsRow1[idx].t = 'On/Off'
+        context.btnsRow2[idx].t = 'Pre/Post'
+        context.knobs1[idx].t = 'Level'
+    }
+}
 /**
  * 
  * @param {MR_DeviceDriver} deviceDriver 
@@ -25,8 +40,8 @@ function makePageCue(deviceDriver, context) {
     }
 
     defaultSubPage.mOnActivate = function (activeDevice) {
-        context.btnsL1U[7].t=''
-        context.btnsL1U[8].t=''
+        context.btnsL1U[7].t = ''
+        context.btnsL1U[8].t = ''
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[6].note, 127])
         context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[6].note, 127])
     }.bind({ context })
@@ -64,8 +79,18 @@ function makePageSends(deviceDriver, context) {
     defaultSubPage.mOnActivate = function (activeDevice) {
         context.btnsL1U[7].t = ''
         context.btnsL1U[8].t = ''
+        resetLabels1(context)
+        setPageSendsLabels(context)
+        sendLableApp1(activeDevice, context)
+        sendLableApp2(activeDevice, context)
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[7].note, 127])
         context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[7].note, 127])
+        for (var i = 0; i < context.numStrips1; i++) {
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow3[i].note, 0])
+            context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow3[i].note, 0])
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow4[i].note, 0])
+            context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[i].note, 0])
+        }
     }.bind({ context })
 
     defaultSubPage.mOnDeactivate = function (activeDevice) {
