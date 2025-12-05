@@ -42,6 +42,10 @@ function makePageCue(deviceDriver, context) {
     defaultSubPage.mOnActivate = function (activeDevice) {
         context.btnsL1U[7].t = ''
         context.btnsL1U[8].t = ''
+        resetLabels1(context)
+        setPageSendsLabels(context)
+        sendLableApp1(activeDevice, context)
+        sendLableApp2(activeDevice, context)
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[6].note, 127])
         context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[6].note, 127])
     }.bind({ context })

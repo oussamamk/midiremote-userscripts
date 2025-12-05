@@ -13,6 +13,13 @@ function setPageDefaultLabels(context) {
         context.btnsRow3[i].t = 'Rec'
         context.btnsRow4[i].t = 'Select'
     }
+
+    context.btnControls[0].t = 'Commands Page'
+    context.btnControls[1].t = 'Up'
+    context.btnControls[2].t = 'Mixer'
+    context.btnControls[3].t = 'Left'
+    context.btnControls[4].t = 'Down'
+    context.btnControls[5].t = 'Right'
 }
 
 /**
@@ -43,7 +50,6 @@ function makeZoomSubPage(page, subPageArea, context) {
     page.makeCommandBinding(context.btnControls[3].d.mSurfaceValue, 'Zoom', 'Zoom Out').setSubPage(subPage)
     page.makeCommandBinding(context.btnControls[4].d.mSurfaceValue, 'Zoom', 'Zoom In Vertically').setSubPage(subPage)
     page.makeCommandBinding(context.btnControls[1].d.mSurfaceValue, 'Zoom', 'Zoom Out Vertically').setSubPage(subPage)
-
     return subPage
 }
 
@@ -79,6 +85,7 @@ function makePageMixer(deviceDriver, context) {
     page.makeCommandBinding(context.btnsL1U[7].d.mSurfaceValue, 'Tool', 'Zoom Tool').setSubPage(defaultSubPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
         if (arg2 === 1) {
             zoomVariable.setProcessValue(activeDevice, 1)
+            context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1U[7].note, 127])
         }
     }
 
@@ -131,19 +138,44 @@ function makePageMixer(deviceDriver, context) {
     }
 
     zoomSubPage.mOnActivate = function (activeDevice) {
+        console.log("zoomSubPage.mOnActivate")
+        context.btnControls[5].t = 'Zoom++'
+        context.btnControls[3].t = 'Zoom--'
+        context.btnControls[4].t = 'V-Zoom++'
+        context.btnControls[1].t = 'V-Zoom--'
+        sendLableApp2(activeDevice, context)
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[7].note, 127])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1U[7].note, 127])
     }
 
     zoomSubPage.mOnDeactivate = function (activeDevice) {
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[7].note, 0])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1U[7].note, 0])
+        context.btnControls[5].t = 'Up'
+        context.btnControls[3].t = 'Down'
+        context.btnControls[4].t = 'Right'
+        context.btnControls[1].t = 'Left'
+        sendLableApp2(activeDevice, context)
     }
 
     markerSubPage.mOnActivate = function (activeDevice) {
+        context.btnControls[5].t = 'Next Marker'
+        context.btnControls[3].t = 'Prev Marker'
+        context.btnControls[4].t = ''
+        context.btnControls[1].t = 'Add Marker'
+        sendLableApp2(activeDevice, context)
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[8].note, 127])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1U[8].note, 127])    
     }
 
     markerSubPage.mOnDeactivate = function (activeDevice) {
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[8].note, 0])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1U[8].note, 0])
+        context.btnControls[5].t = 'Up'
+        context.btnControls[3].t = 'Down'
+        context.btnControls[4].t = 'Right'
+        context.btnControls[1].t = 'Left'
+        sendLableApp2(activeDevice, context)
     }
 
     return page

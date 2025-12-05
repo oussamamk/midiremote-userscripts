@@ -84,6 +84,15 @@ function sendLableApp2(activeDevice, context) {
             }
             data.push(0)
         }
+
+        if (i < 6 && context.btnControls[i].t != null) {
+            data.push(context.btnControls[i].idx, context.btnControls[i].t.length)
+            for (var j = 0; j < context.btnControls[i].t.length; j++) {
+                data.push(context.btnControls[i].t.charCodeAt(j))
+            }
+            data.push(0)
+        }
+
     }
     data.push(0xf7)
     context.midiOutput4.sendMidi(activeDevice, data)

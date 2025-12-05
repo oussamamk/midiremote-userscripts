@@ -440,11 +440,14 @@ function makePageChannelStrip(deviceDriver, context) {
         context.btnsL1U[8].t = ''
         setPageChannelStripLabels(context)
         sendLableApp1(activeDevice, context)
+        sendLableApp2(activeDevice, context)
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[5].note, 127])
         context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[5].note, 127])
     }
 
     defaultSubPage.mOnDeactivate = function (activeDevice) {
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[5].note, 0])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[5].note, 0])
     }
 
     gateSubPage.mOnActivate = function (activeDevice) {

@@ -112,6 +112,10 @@ function makePageInsertEffects(deviceDriver, context) {
 
         context.btnsL1U[7].t = ''
         context.btnsL1U[8].t = ''
+        resetLabels1(context)
+        sendLableApp1(activeDevice, context)
+        sendLableApp2(activeDevice, context)
+
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[8].note, 127])
         context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[8].note, 127])
     }
@@ -120,6 +124,8 @@ function makePageInsertEffects(deviceDriver, context) {
         for (var i = 0; i < context.numStrips1; i++) {
             context.btnsRow4[i].d.mSurfaceValue.setProcessValue(activeDevice, 0)
         }
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[8].note, 0])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[8].note, 0])
     }
 
     return page
