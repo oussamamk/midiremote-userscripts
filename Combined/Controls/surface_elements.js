@@ -22,7 +22,7 @@ function makeButton1(surface, context, note, x, y, w, h, idx) {
     button.h = h
     button.idx = idx
 
-    button.d.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value , diff) {
+    button.d.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value, diff) {
         context.midiOutput1.sendMidi(activeDevice, [0x90, this.note, value != 0 ? 127 : 0])
         context.midiOutput3.sendMidi(activeDevice, [0x90, this.note, value != 0 ? 127 : 0])
     }.bind({ context, note })
@@ -54,7 +54,7 @@ function makeButton2(surface, context, note, x, y, w, h, idx) {
     button.h = h
     button.idx = idx
 
-    button.d.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value , diff) {
+    button.d.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value, diff) {
         context.midiOutput2.sendMidi(activeDevice, [0x90, this.note, value != 0 ? 127 : 0])
         context.midiOutput4.sendMidi(activeDevice, [0x90, this.note, value != 0 ? 127 : 0])
     }.bind({ context, note })
@@ -304,6 +304,6 @@ function makeSurfaceElements(deviceDriver, context) {
 }
 
 module.exports = {
-  makeSurfaceElements,
-  makeValueBinding
+    makeSurfaceElements,
+    makeValueBinding
 }

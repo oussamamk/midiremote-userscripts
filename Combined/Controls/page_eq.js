@@ -7,6 +7,9 @@ var helper = require("./helper.js")
 var sendLableApp1 = helper.sendLableApp1
 var sendLableApp2 = helper.sendLableApp2
 
+/**
+ * @param {object} context 
+ */
 function setPageEQLabels(context) {
     resetLabels1(context)
     resetLabels2(context)
@@ -49,6 +52,7 @@ function setPageEQLabels(context) {
 
     context.btnsRow1[7].t = 'Toggle Bypass EQ'
 }
+
 /**
  * @param {MR_DeviceDriver} deviceDriver 
  * @param {MR_FactoryMappingPage} page
@@ -245,11 +249,9 @@ function makeSubPagePrefilter(page, defaultSubPage, preFilter, context) {
  */
 function makePageEQ(deviceDriver, context) {
     var page = deviceDriver.mMapping.makePage('EQ')
-
     var subPageArea = page.makeSubPageArea('EQ')
-    var defaultSubPage = subPageArea.makeSubPage('default')
-
-    makeSubPageTransportAndContols(page, subPageArea, context)
+    var defaultSubPage = makeSubPageTransportAndContols(page, subPageArea, context)
+    
     var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
     makeSubPageEQBand(deviceDriver, page, defaultSubPage, selectedTrackChannel.mChannelEQ.mBand1, 1, context)
     makeSubPageEQBand(deviceDriver, page, defaultSubPage, selectedTrackChannel.mChannelEQ.mBand2, 2, context)
@@ -259,8 +261,6 @@ function makePageEQ(deviceDriver, context) {
     page.makeCommandBinding(context.btnsRow1[7].d.mSurfaceValue, 'Process Project Logical Editor', 'Toggle EQ Bypass of Selected Tracks').setSubPage(defaultSubPage)
 
     defaultSubPage.mOnActivate = function (activeDevice) {
-        context.btnsL1U[7].t=''
-        context.btnsL1U[8].t=''
         setPageEQLabels(context)
         sendLableApp1(activeDevice, context)
         sendLableApp2(activeDevice, context)
@@ -268,11 +268,12 @@ function makePageEQ(deviceDriver, context) {
         context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[4].note, 127])
     }
 
+
     defaultSubPage.mOnDeactivate = function (activeDevice) {
         context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1L[4].note, 0])
         context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1L[4].note, 0])
     }
-  
+
     return page
 }
 

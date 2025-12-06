@@ -1,3 +1,6 @@
+var helper = require("./helper.js")
+var sendLableApp2 = helper.sendLableApp2
+
 /**
  * @param {MR_FactoryMappingPage} page 
  * @param {MR_SubPageArea} subPageArea
@@ -5,31 +8,172 @@
  * @return {MR_SubPage}
  */
 function makeSubPageTransportAndContols(page, subPageArea, context) {
-    var subPage = subPageArea.makeSubPage('transport')
-    page.makeValueBinding(context.btnForward.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mForward).setSubPage(subPage)
-    page.makeValueBinding(context.btnRewind.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRewind).setSubPage(subPage)
-    page.makeValueBinding(context.btnStart.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mStart).setTypeToggle().setSubPage(subPage)
-    page.makeValueBinding(context.btnStop.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mStop).setTypeToggle().setSubPage(subPage)
-    page.makeValueBinding(context.btnRecord.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRecord).setTypeToggle().setSubPage(subPage)
-    page.makeCommandBinding(context.btnRight.d.mSurfaceValue, 'Transport', '').setSubPage(subPage)
-    page.makeCommandBinding(context.btnLeft.d.mSurfaceValue, 'Transport', '').setSubPage(subPage)
-    page.makeActionBinding(context.btnDown.d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mNextTrack).setSubPage(subPage)
-    page.makeActionBinding(context.btnUp.d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mPrevTrack).setSubPage(subPage)
-    page.makeValueBinding(context.btnControls[3].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRewind).setSubPage(subPage)
-    page.makeValueBinding(context.btnControls[5].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mForward).setSubPage(subPage)
-    page.makeActionBinding(context.btnControls[4].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mNextTrack).setSubPage(subPage)
-    page.makeActionBinding(context.btnControls[1].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mPrevTrack).setSubPage(subPage)
-    page.makeCommandBinding(context.btnControls[2].d.mSurfaceValue, 'Devices', 'Mixer').setSubPage(subPage)
-    page.makeValueBinding(context.btnsL1U[0].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mMetronomeActive).setTypeToggle().setSubPage(subPage)
-    page.makeValueBinding(context.btnsL1U[1].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mCycleActive).setTypeToggle().setSubPage(subPage)
-    page.makeValueBinding(context.btnsL1U[2].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mAutomationRead).setTypeToggle().setSubPage(subPage)
-    page.makeValueBinding(context.btnsL1U[3].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mAutomationWrite).setTypeToggle().setSubPage(subPage)
-    page.makeValueBinding(context.btnsL1U[4].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mMonitorEnable).setTypeToggle().setSubPage(subPage)
-    page.makeValueBinding(context.btnsL1U[5].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mEditorOpen).setTypeToggle().setSubPage(subPage)
-    page.makeCommandBinding(context.btnsL1L[0].d.mSurfaceValue, 'Edit', 'Undo').setSubPage(subPage)
-    page.makeCommandBinding(context.btnsL1L[1].d.mSurfaceValue, 'Edit', 'Redo').setSubPage(subPage)
-    page.makeCommandBinding(context.btnsL1L[2].d.mSurfaceValue, 'Edit', 'Unmute All').setSubPage(subPage)
-    page.makeCommandBinding(context.btnsL1L[3].d.mSurfaceValue, 'Edit', 'Deactivate All Solo').setSubPage(subPage)
+    var defaultSubPage = subPageArea.makeSubPage('transport')
+    page.makeValueBinding(context.btnForward.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mForward).setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnRewind.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRewind).setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnStart.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mStart).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnStop.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mStop).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnRecord.d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRecord).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeCommandBinding(context.btnRight.d.mSurfaceValue, 'Transport', '').setSubPage(defaultSubPage)
+    page.makeCommandBinding(context.btnLeft.d.mSurfaceValue, 'Transport', '').setSubPage(defaultSubPage)
+    page.makeActionBinding(context.btnDown.d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mNextTrack).setSubPage(defaultSubPage)
+    page.makeActionBinding(context.btnUp.d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mPrevTrack).setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnControls[3].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRewind).setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnControls[5].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mForward).setSubPage(defaultSubPage)
+    page.makeActionBinding(context.btnControls[4].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mNextTrack).setSubPage(defaultSubPage)
+    page.makeActionBinding(context.btnControls[1].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mPrevTrack).setSubPage(defaultSubPage)
+    page.makeCommandBinding(context.btnControls[2].d.mSurfaceValue, 'Devices', 'Mixer').setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnsL1U[0].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mMetronomeActive).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnsL1U[1].d.mSurfaceValue, page.mHostAccess.mTransport.mValue.mCycleActive).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnsL1U[2].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mAutomationRead).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnsL1U[3].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mAutomationWrite).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnsL1U[4].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mMonitorEnable).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeValueBinding(context.btnsL1U[5].d.mSurfaceValue, page.mHostAccess.mTrackSelection.mMixerChannel.mValue.mEditorOpen).setTypeToggle().setSubPage(defaultSubPage)
+    page.makeCommandBinding(context.btnsL1L[0].d.mSurfaceValue, 'Edit', 'Undo').setSubPage(defaultSubPage)
+    page.makeCommandBinding(context.btnsL1L[1].d.mSurfaceValue, 'Edit', 'Redo').setSubPage(defaultSubPage)
+    page.makeCommandBinding(context.btnsL1L[2].d.mSurfaceValue, 'Edit', 'Unmute All').setSubPage(defaultSubPage)
+    page.makeCommandBinding(context.btnsL1L[3].d.mSurfaceValue, 'Edit', 'Deactivate All Solo').setSubPage(defaultSubPage)
+
+    var zoomSubPage = makeZoomSubPage(page, subPageArea, context)
+    var markerSubPage = makeMarkerSubPage(page, subPageArea, context)
+
+    page.makeCommandBinding(context.btnsL1U[7].d.mSurfaceValue, 'Tool', 'Zoom Tool').setSubPage(defaultSubPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
+        if (arg2 === 1) {
+            zoomSubPage.mAction.mActivate.trigger(activeMapping)
+        }
+    }
+
+    page.makeCommandBinding(context.btnsL1U[8].d.mSurfaceValue, 'Tool', 'Draw Tool').setSubPage(defaultSubPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
+        if (arg2 === 1) {
+            markerSubPage.mAction.mActivate.trigger(activeMapping)
+        }
+    }
+    page.makeCommandBinding(context.btnsL1U[7].d.mSurfaceValue, 'Tool', 'Zoom Tool').setSubPage(zoomSubPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
+        if (arg2 === 1) {
+            defaultSubPage.mAction.mActivate.trigger(activeMapping)
+        }
+    }
+
+    page.makeCommandBinding(context.btnsL1U[8].d.mSurfaceValue, 'Tool', 'Draw Tool').setSubPage(zoomSubPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
+        if (arg2 === 1) {
+            markerSubPage.mAction.mActivate.trigger(activeMapping)
+        }
+    }
+
+    page.makeCommandBinding(context.btnsL1U[7].d.mSurfaceValue, 'Tool', 'Zoom Tool').setSubPage(markerSubPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
+        if (arg2 === 1) {
+            zoomSubPage.mAction.mActivate.trigger(activeMapping)
+        }
+    }
+
+    page.makeCommandBinding(context.btnsL1U[8].d.mSurfaceValue, 'Tool', 'Draw Tool').setSubPage(markerSubPage).mOnValueChange = function (activeDevice, activeMapping, arg2, arg3) {
+        if (arg2 === 1) {
+            defaultSubPage.mAction.mActivate.trigger(activeMapping)
+        }
+    }
+
+    return defaultSubPage
+}
+
+function setLabelsTransportAndControls(context) {
+    context.btnsL1U[0].t = 'Metronome'
+    context.btnsL1U[1].t = 'Cycle'
+    context.btnsL1U[2].t = 'Auto-Read'
+    context.btnsL1U[3].t = 'Auto-Write'
+    context.btnsL1U[4].t = 'Monitor'
+    context.btnsL1U[5].t = 'Channel Settings'
+    context.btnsL1U[6].t = 'Instrument'
+    context.btnsL1U[7].t = 'Zoom'
+    context.btnsL1U[8].t = 'Marker'
+
+    context.btnsL1L[0].t = 'Undo'
+    context.btnsL1L[1].t = 'Redo'
+    context.btnsL1L[2].t = 'UnMute All'
+    context.btnsL1L[3].t = 'UnSolo All'
+    context.btnsL1L[4].t = 'EQ'
+    context.btnsL1L[5].t = 'Channel Strip'
+    context.btnsL1L[6].t = 'Cue'
+    context.btnsL1L[7].t = 'Sends'
+    context.btnsL1L[8].t = 'Insert Effects'
+
+    context.btnControls[0].t = 'Commands Page'
+    context.btnControls[1].t = 'Up'
+    context.btnControls[2].t = 'Mixer'
+    context.btnControls[3].t = 'Left'
+    context.btnControls[4].t = 'Down'
+    context.btnControls[5].t = 'Right'
+}
+
+/**
+ * @param {MR_FactoryMappingPage} page 
+ * @param {MR_SubPageArea} subPageArea
+ * @param {object} context 
+ * @return {MR_SubPage}
+ */
+function makeMarkerSubPage(page, subPageArea, context) {
+    var subPage = subPageArea.makeSubPage('marker')
+    page.makeCommandBinding(context.btnControls[1].d.mSurfaceValue, 'Marker', 'Insert Marker').setSubPage(subPage)
+    page.makeCommandBinding(context.btnControls[3].d.mSurfaceValue, 'Transport', 'Locate Previous Event').setSubPage(subPage)
+    page.makeCommandBinding(context.btnControls[5].d.mSurfaceValue, 'Transport', 'Locate Next Event').setSubPage(subPage)
+    page.makeCommandBinding(context.btnControls[4].d.mSurfaceValue, 'Transport', '').setSubPage(subPage)
+
+    subPage.mOnActivate = function (activeDevice) {
+        context.btnControls[5].t = 'Next Marker'
+        context.btnControls[3].t = 'Prev Marker'
+        context.btnControls[4].t = ''
+        context.btnControls[1].t = 'Add Marker'
+        sendLableApp2(activeDevice, context)
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[8].note, 127])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1U[8].note, 127])
+    }
+
+    subPage.mOnDeactivate = function (activeDevice) {
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[8].note, 0])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1U[8].note, 0])
+        context.btnControls[5].t = 'Up'
+        context.btnControls[3].t = 'Down'
+        context.btnControls[4].t = 'Right'
+        context.btnControls[1].t = 'Left'
+        sendLableApp2(activeDevice, context)
+    }
+
+    return subPage
+}
+
+
+/**
+ * @param {MR_FactoryMappingPage} page 
+ * @param {MR_SubPageArea} subPageArea
+ * @param {object} context 
+ * @return {MR_SubPage}
+ */
+function makeZoomSubPage(page, subPageArea, context) {
+    var subPage = subPageArea.makeSubPage('zoom')
+    page.makeCommandBinding(context.btnControls[5].d.mSurfaceValue, 'Zoom', 'Zoom In').setSubPage(subPage)
+    page.makeCommandBinding(context.btnControls[3].d.mSurfaceValue, 'Zoom', 'Zoom Out').setSubPage(subPage)
+    page.makeCommandBinding(context.btnControls[4].d.mSurfaceValue, 'Zoom', 'Zoom In Vertically').setSubPage(subPage)
+    page.makeCommandBinding(context.btnControls[1].d.mSurfaceValue, 'Zoom', 'Zoom Out Vertically').setSubPage(subPage)
+
+    subPage.mOnActivate = function (activeDevice) {
+        context.btnControls[5].t = 'Zoom++'
+        context.btnControls[3].t = 'Zoom--'
+        context.btnControls[4].t = 'V-Zoom++'
+        context.btnControls[1].t = 'V-Zoom--'
+        sendLableApp2(activeDevice, context)
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[7].note, 127])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1U[7].note, 127])
+    }
+
+    subPage.mOnDeactivate = function (activeDevice) {
+        context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[7].note, 0])
+        context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsL1U[7].note, 0])
+        context.btnControls[5].t = 'Up'
+        context.btnControls[3].t = 'Down'
+        context.btnControls[4].t = 'Right'
+        context.btnControls[1].t = 'Left'
+        sendLableApp2(activeDevice, context)
+    }
+
     return subPage
 }
 
@@ -58,15 +202,15 @@ function assignButtons(page, subPage, activeDevice, dam, context, sObjects, base
     bb.setSubPage(subPage)
     bb.mOnValueChange = function (activeDevice, activeMapping, value, arg3) {
         if (offset == 0) {
-            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[this.sPos].note, value > 0 ? 127 : 0 ])
-            context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow1[this.sPos].note, value > 0 ? 127 : 0 ])
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[this.sPos].note, value > 0 ? 127 : 0])
+            context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow1[this.sPos].note, value > 0 ? 127 : 0])
         } else {
-            context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsRow2[this.sPos - this.offset].note, value > 0 ? 127 : 0 ])
-            context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsRow2[this.sPos - this.offset].note, value > 0 ? 127 : 0 ])
+            context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsRow2[this.sPos - this.offset].note, value > 0 ? 127 : 0])
+            context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsRow2[this.sPos - this.offset].note, value > 0 ? 127 : 0])
         }
         dam.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
         effectContext.values.buttons[sPos] = value > 0 ? true : false
-    }.bind({ pTag, sPos, offset})
+    }.bind({ pTag, sPos, offset })
     sObjects[sPos - offset].d.mSurfaceValue.setProcessValue(activeDevice, pValue > 0 ? 1 : 0)
     context.midiOutput1.sendMidi(activeDevice, [0x90, sObjects[sPos - offset].note, pValue > 0 ? 127 : 0])
     effectContext.names.buttons[sPos] = pName
@@ -101,7 +245,7 @@ function assignFaders(page, subPage, activeDevice, dam, context, sObjects, baseI
         }
         dam.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
         effectContext.values.faders[sPos] = value
-    }.bind({ pTag, sPos, offset})
+    }.bind({ pTag, sPos, offset })
     sObjects[sPos - offset].d.mSurfaceValue.setProcessValue(activeDevice, pValue)
     effectContext.names.faders[sPos] = pName
     effectContext.values.faders[sPos] = pValue
@@ -135,7 +279,7 @@ function assignKnobs(page, subPage, activeDevice, dam, context, sObjects, baseID
         }
         dam.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
         effectContext.values.knobs[sPos] = value
-    }.bind({ pTag, sPos, offset})
+    }.bind({ pTag, sPos, offset })
     sObjects[sPos - offset].d.mSurfaceValue.setProcessValue(activeDevice, pValue)
     effectContext.names.knobs[sPos] = pName
     effectContext.values.knobs[sPos] = pValue
@@ -457,5 +601,6 @@ module.exports = {
     bindInstrumentKnobsButtons,
     updateEffectsKnobsButtons,
     resetLabels1,
-    resetLabels2
+    resetLabels2,
+    setLabelsTransportAndControls
 }

@@ -2,14 +2,12 @@ var helper = require("./helper.js")
 var sendLableApp1 = helper.sendLableApp1
 var sendLableApp2 = helper.sendLableApp2
 
-
 var page_common = require('./page_common.js')
 var makeSubPageTransportAndContols = page_common.makeSubPageTransportAndContols
 var bindInstrumentKnobsButtons = page_common.bindInstrumentKnobsButtons
 var resetLabels1 = page_common.resetLabels1
 var resetLabels2 = page_common.resetLabels2
 var updateEffectsKnobsButtons = page_common.updateEffectsKnobsButtons
-
 
 var effectsMapping = {
     'CSR Hall': function () {
@@ -44,9 +42,8 @@ function getEffectsMappping(name) {
 function makePageInsertEffects(deviceDriver, context) {
     var page = deviceDriver.mMapping.makePage('InsertEffects')
     var subPageArea = page.makeSubPageArea('InserEffects')
-    var defaultSubPage = subPageArea.makeSubPage('default')
+    var defaultSubPage = makeSubPageTransportAndContols(page, subPageArea, context)
 
-    makeSubPageTransportAndContols(page, subPageArea, context)
     var customVar = page.mCustom.makeHostValueVariable('customVar');
     var insertViewer = page.mHostAccess.mTrackSelection.mMixerChannel.mInsertAndStripEffects.makeInsertEffectViewer('insertsViewer')
     insertViewer.followPluginWindowInFocus()
@@ -110,8 +107,6 @@ function makePageInsertEffects(deviceDriver, context) {
             context.btnsRow4[i].d.mSurfaceValue.setProcessValue(activeDevice, 0)
         }
 
-        context.btnsL1U[7].t = ''
-        context.btnsL1U[8].t = ''
         resetLabels1(context)
         sendLableApp1(activeDevice, context)
         sendLableApp2(activeDevice, context)

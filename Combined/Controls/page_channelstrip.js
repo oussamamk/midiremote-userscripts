@@ -9,6 +9,9 @@ var helper = require("./helper.js")
 var sendLableApp1 = helper.sendLableApp1
 var sendLableApp2 = helper.sendLableApp2
 
+/**
+ * @param {object} context 
+ */
 function setPageChannelStripLabels(context) {
     resetLabels1(context)
     resetLabels2(context)
@@ -34,6 +37,9 @@ function setPageChannelStripLabels(context) {
     context.btnsRow4[4].t = 'Limiter SubPage'
 }
 
+/**
+ * @param {object} context 
+ */
 function setSubPageGateLabels(context) {
     resetLabels1(context)
     resetLabels2(context)
@@ -49,6 +55,9 @@ function setSubPageGateLabels(context) {
     context.btnsRow4[4].t = 'Limiter SubPage'
 }
 
+/** 
+ * @param {object} context 
+ */
 function setSubPageCompLabels(context) {
     resetLabels1(context)
     resetLabels2(context)
@@ -64,6 +73,9 @@ function setSubPageCompLabels(context) {
     context.btnsRow4[4].t = 'Limiter SubPage'
 }
 
+/**
+ * @param {object} context 
+ */
 function setSubPageToolsLabels(context) {
     resetLabels1(context)
     resetLabels2(context)
@@ -79,6 +91,9 @@ function setSubPageToolsLabels(context) {
     context.btnsRow4[4].t = 'Limiter SubPage'
 }
 
+/**
+ * @param {object} context 
+ */
 function setSubPageSaturatorLabels(context) {
     resetLabels1(context)
     resetLabels2(context)
@@ -94,6 +109,9 @@ function setSubPageSaturatorLabels(context) {
     context.btnsRow4[4].t = 'Limiter SubPage'
 }
 
+/**
+ * @param {object} context 
+ */
 function setSubPageLimiterLabels(context) {
     resetLabels1(context)
     resetLabels2(context)
@@ -260,7 +278,7 @@ function getChannelStripPluginMapping(name) {
 function makePageChannelStrip(deviceDriver, context) {
     var page = deviceDriver.mMapping.makePage('ChannelStrip')
     var subPageArea = page.makeSubPageArea('ChannelStrip')
-    var defaultSubPage = subPageArea.makeSubPage('default')
+    var defaultSubPage = makeSubPageTransportAndContols(page, subPageArea, context)
     var gateSubPage = subPageArea.makeSubPage('gate')
     var compressorSubPage = subPageArea.makeSubPage('compressor')
     var toolsSubPage = subPageArea.makeSubPage('tools')
@@ -302,8 +320,6 @@ function makePageChannelStrip(deviceDriver, context) {
     page.makeActionBinding(context.btnsRow4[2].d.mSurfaceValue, toolsSubPage.mAction.mActivate).setSubPage(limiterSubPage)
     page.makeActionBinding(context.btnsRow4[3].d.mSurfaceValue, saturatorSubPage.mAction.mActivate).setSubPage(limiterSubPage)
     page.makeActionBinding(context.btnsRow4[4].d.mSurfaceValue, defaultSubPage.mAction.mActivate).setSubPage(limiterSubPage)
-
-    makeSubPageTransportAndContols(page, subPageArea, context)
 
     var customVar = page.mCustom.makeHostValueVariable('customVar');
     var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
@@ -436,8 +452,6 @@ function makePageChannelStrip(deviceDriver, context) {
             context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow4[i].note, 0])
         }
 
-        context.btnsL1U[7].t = ''
-        context.btnsL1U[8].t = ''
         setPageChannelStripLabels(context)
         sendLableApp1(activeDevice, context)
         sendLableApp2(activeDevice, context)

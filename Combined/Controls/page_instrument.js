@@ -45,10 +45,10 @@ var instrumentsMapping = {
     },
     'Kontakt - Perfect Sounds': function () {
         return {
-            knobs1: [4222, 4223, 4224, ],
+            knobs1: [4222, 4223, 4224],
             faders1: [4220],
             faders2: [4211, 4212, 4213, 4214, 4215, 4216, 4217, 4218, 4219],
-            buttons: [4226, 4227 ],
+            buttons: [4226, 4227],
             ignore: ['#', 'CC', 'Omni', 'Poly', 'Bank ', 'Foot ', 'Data ', 'Portamento ', 'Channel Volume', 'Balance(', 'Pan(', 'All ', 'Pitchbend', 'Expression(', ' Pedal', 'Sostenuto', 'Legato ', 'Hold ', 'Aftertouch', 'Kontakt'],
             smapping: true
         }
@@ -103,11 +103,11 @@ function makePageInstrument(deviceDriver, context) {
         0, 0, 0, 0, 0, 0, 0, 0, 0]
     effectContext.names = {}
     effectContext.names.buttons = ['', '', '', '', '', '', '', '',
-                                 '', '', '', '', '', '', '', '']
+        '', '', '', '', '', '', '', '']
     effectContext.names.knobs = ['', '', '', '', '', '', '', '',
-                              '', '', '', '', '', '', '', '', '']
+        '', '', '', '', '', '', '', '', '']
     effectContext.names.faders = ['', '', '', '', '', '', '', '',
-                              '', '', '', '', '', '', '', '', '']
+        '', '', '', '', '', '', '', '', '']
     instrument.mOnChangePluginIdentity = function (activeDevice, activeMapping, name, vendor, version, format) {
         var arr = ["name:", name, "vendor:", vendor, "version:", version, "format:", format]
         console.log(arr.join(' '))
@@ -122,10 +122,10 @@ function makePageInstrument(deviceDriver, context) {
         sendLableApp2(activeDevice, context)
     }
 
-    page.mHostAccess.mTrackSelection.mMixerChannel.mOnTitleChange = function(activeDevice, activeMapping, title) {
+    page.mHostAccess.mTrackSelection.mMixerChannel.mOnTitleChange = function (activeDevice, activeMapping, title) {
         console.log("title: " + title)
         resetLabels1(context)
-        resetLabels2(context)   
+        resetLabels2(context)
         if (instrumentsMapping[title]) {
             var mapping = getInstrumentMappping(title)
             bindInstrumentKnobsButtons(page, defaultSubPage, customVar, instrument, context, activeDevice, activeMapping, effectContext, mapping, false)

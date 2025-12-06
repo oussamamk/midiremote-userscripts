@@ -30,6 +30,7 @@ var sendLableApp2 = helper.sendLableApp2
 var page_common = require("./page_common.js")
 var resetLabels1 = page_common.resetLabels1
 var resetLabels2 = page_common.resetLabels2
+var setLabelsTransportAndControls = page_common.setLabelsTransportAndControls
 
 var midiremote_api = require('midiremote_api_v1')
 
@@ -82,28 +83,6 @@ context.btnsL3L = {}
 context.btnsL4U = {}
 context.btnsL4L = {}
 context.btnControls = {}
-
-function setLabelsTransportAndControls(context) {
-    context.btnsL1U[0].t = 'Metronome'
-    context.btnsL1U[1].t = 'Cycle'
-    context.btnsL1U[2].t = 'Auto-Read'
-    context.btnsL1U[3].t = 'Auto-Write'
-    context.btnsL1U[4].t = 'Monitor'
-    context.btnsL1U[5].t = 'Channel Settings'
-    context.btnsL1U[6].t = 'Instrument'
-    context.btnsL1U[7].t = 'Zoom'
-    context.btnsL1U[8].t = 'Marker'
-
-    context.btnsL1L[0].t = 'Undo'
-    context.btnsL1L[1].t = 'Redo'
-    context.btnsL1L[2].t = 'UnMute All'
-    context.btnsL1L[3].t = 'UnSolo All'
-    context.btnsL1L[4].t = 'EQ'
-    context.btnsL1L[5].t = 'Channel Strip'
-    context.btnsL1L[6].t = 'Cue'
-    context.btnsL1L[7].t = 'Sends'
-    context.btnsL1L[8].t = 'Insert Effects'
-}
 
 deviceDriver.mOnActivate = function (activeDevice) {
     context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsL1U[5].note, 0])
@@ -189,49 +168,49 @@ commandsPage.makeActionBinding(context.btnsL1L[7].d.mSurfaceValue, sendsPage.mAc
 commandsPage.makeActionBinding(context.btnsL1L[8].d.mSurfaceValue, insertEffectsPage.mAction.mActivate)
 commandsPage.makeActionBinding(context.btnControls[0].d.mSurfaceValue, mixerPage.mAction.mActivate)
 
-mixerPage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, mixerPage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function(activeDevice, activeMapping, value, diff) {
+mixerPage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, mixerPage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function (activeDevice, activeMapping, value, diff) {
     if (value == 1) {
         instrumentPage.mAction.mActivate.trigger(activeMapping)
     }
 }
 
-eqPage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, eqPage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function(activeDevice, activeMapping, value, diff) {
+eqPage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, eqPage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function (activeDevice, activeMapping, value, diff) {
     if (value == 1) {
         instrumentPage.mAction.mActivate.trigger(activeMapping)
     }
 }
 
-channelStripPage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, channelStripPage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function(activeDevice, activeMapping, value, diff) {
+channelStripPage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, channelStripPage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function (activeDevice, activeMapping, value, diff) {
     if (value == 1) {
         instrumentPage.mAction.mActivate.trigger(activeMapping)
     }
 }
 
-cuePage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, cuePage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function(activeDevice, activeMapping, value, diff) {
+cuePage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, cuePage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function (activeDevice, activeMapping, value, diff) {
     if (value == 1) {
         instrumentPage.mAction.mActivate.trigger(activeMapping)
     }
 }
 
-sendsPage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, sendsPage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function(activeDevice, activeMapping, value, diff) {
+sendsPage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, sendsPage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function (activeDevice, activeMapping, value, diff) {
     if (value == 1) {
         instrumentPage.mAction.mActivate.trigger(activeMapping)
     }
 }
 
-insertEffectsPage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, insertEffectsPage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function(activeDevice, activeMapping, value, diff) {
+insertEffectsPage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, insertEffectsPage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function (activeDevice, activeMapping, value, diff) {
     if (value == 1) {
         instrumentPage.mAction.mActivate.trigger(activeMapping)
     }
 }
 
-instrumentPage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, instrumentPage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function(activeDevice, activeMapping, value, diff) {
+instrumentPage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, instrumentPage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function (activeDevice, activeMapping, value, diff) {
     if (value == 0) {
         mixerPage.mAction.mActivate.trigger(activeMapping)
     }
 }
 
-commandsPage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, insertEffectsPage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function(activeDevice, activeMapping, value, diff) {
+commandsPage.makeValueBinding(context.btnsL1U[6].d.mSurfaceValue, insertEffectsPage.mHostAccess.mTrackSelection.mMixerChannel.mValue.mInstrumentOpen).setTypeToggle().mOnValueChange = function (activeDevice, activeMapping, value, diff) {
     if (value == 1) {
         instrumentPage.mAction.mActivate.trigger(activeMapping)
     }
