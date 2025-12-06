@@ -205,8 +205,8 @@ function assignButtons(page, subPage, activeDevice, dam, context, sObjects, base
             context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow1[this.sPos].note, value > 0 ? 127 : 0])
             context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow1[this.sPos].note, value > 0 ? 127 : 0])
         } else {
-            context.midiOutput2.sendMidi(activeDevice, [0x90, context.btnsRow2[this.sPos - this.offset].note, value > 0 ? 127 : 0])
-            context.midiOutput4.sendMidi(activeDevice, [0x90, context.btnsRow2[this.sPos - this.offset].note, value > 0 ? 127 : 0])
+            context.midiOutput1.sendMidi(activeDevice, [0x90, context.btnsRow2[this.sPos - this.offset].note, value > 0 ? 127 : 0])
+            context.midiOutput3.sendMidi(activeDevice, [0x90, context.btnsRow2[this.sPos - this.offset].note, value > 0 ? 127 : 0])
         }
         dam.setParameterProcessValue(activeMapping, baseID, this.pTag, value)
         effectContext.values.buttons[sPos] = value > 0 ? true : false
@@ -417,7 +417,7 @@ function staticInstrumentKnobsButtons(page, subPage, activeDevice, activeMapping
         if (sPos < context.numStrips1) {
             assignButtons(page, subPage, activeDevice, dam, context, context.btnsRow1, baseID, pTag, mapping, effectContext, customVar, pValue, sPos, 0, pName)
         } else if (sPos < (2 * context.numStrips1)) {
-            assignButtons(page, subPage, activeDevice, dam, context, context.btnsRow2, baseID, pTag, mapping, effectContext, customVar, pValue, sPos + context.numStrips1, context.numStrips1, pName)
+            assignButtons(page, subPage, activeDevice, dam, context, context.btnsRow2, baseID, pTag, mapping, effectContext, customVar, pValue, sPos, context.numStrips1, pName)
         }
     }
 

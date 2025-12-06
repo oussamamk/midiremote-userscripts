@@ -52,6 +52,16 @@ var instrumentsMapping = {
             ignore: ['#', 'CC', 'Omni', 'Poly', 'Bank ', 'Foot ', 'Data ', 'Portamento ', 'Channel Volume', 'Balance(', 'Pan(', 'All ', 'Pitchbend', 'Expression(', ' Pedal', 'Sostenuto', 'Legato ', 'Hold ', 'Aftertouch', 'Kontakt'],
             smapping: true
         }
+    },
+    'Kontakt - The Grandeur': function () {
+        return {
+            knobs1: [4201, 4202, 4203, 4205, 4206, 4207, 4213, 4215],
+            knobs2: [4209, 4210, 4211, 4216, 4218],
+            faders1: [],
+            buttons: [4204, 4208, 4212, 4214, 4217, 4219, 4222, 4226, 4228, 4230, 4232, 4223, 4234, 4224, 4225],
+            ignore: ['#', 'CC', 'Omni', 'Poly', 'Bank ', 'Foot ', 'Data ', 'Portamento ', 'Channel Volume', 'Balance(', 'Pan(', 'All ', 'Pitchbend', 'Expression(', ' Pedal', 'Sostenuto', 'Legato ', 'Hold ', 'Aftertouch', 'Kontakt'],
+            smapping: true
+        }
     }
 }
 
@@ -109,8 +119,8 @@ function makePageInstrument(deviceDriver, context) {
     effectContext.names.faders = ['', '', '', '', '', '', '', '',
         '', '', '', '', '', '', '', '', '']
     instrument.mOnChangePluginIdentity = function (activeDevice, activeMapping, name, vendor, version, format) {
-        var arr = ["name:", name, "vendor:", vendor, "version:", version, "format:", format]
-        console.log(arr.join(' '))
+        // var arr = ["name:", name, "vendor:", vendor, "version:", version, "format:", format]
+        // console.log(arr.join(' '))
         resetLabels1(context)
         resetLabels2(context)
         if (instrumentsMapping[name]) {
@@ -123,7 +133,6 @@ function makePageInstrument(deviceDriver, context) {
     }
 
     page.mHostAccess.mTrackSelection.mMixerChannel.mOnTitleChange = function (activeDevice, activeMapping, title) {
-        console.log("title: " + title)
         resetLabels1(context)
         resetLabels2(context)
         if (instrumentsMapping[title]) {
